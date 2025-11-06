@@ -99,6 +99,12 @@ const Products = () => {
     }))
   ];
 
+  // Show only All Products + first 4 categories by default, toggle to show all
+  const [showAllCategories, setShowAllCategories] = useState(false);
+  const categoriesToDisplay = showAllCategories
+    ? displayCategories
+    : [displayCategories[0], ...displayCategories.slice(1, 5)];
+
   const filteredProducts = selectedCategory === "all" 
     ? products 
     : products.filter(p => p.categories && p.categories.includes(selectedCategory));
@@ -145,8 +151,8 @@ const Products = () => {
       {/* Category Filter */}
       <section className="py-8 bg-card border-b">
         <div className="container mx-auto px-4">
-          <div className="flex flex-wrap justify-center gap-4">
-            {displayCategories.map((cat) => {
+          <div className="flex flex-wrap justify-center gap-4 items-center">
+            {categoriesToDisplay.map((cat) => {
               const Icon = cat.icon;
               return (
                 <Button
@@ -160,6 +166,18 @@ const Products = () => {
                 </Button>
               );
             })}
+
+            {/* Show More / Less toggle when there are more than 4 categories */}
+            {displayCategories.length > 5 && (
+              <Button
+                key="more-toggle"
+                variant="ghost"
+                onClick={() => setShowAllCategories(prev => !prev)}
+                className="flex items-center gap-2"
+              >
+                {showAllCategories ? "Less" : "More"}
+              </Button>
+            )}
           </div>
         </div>
       </section>
