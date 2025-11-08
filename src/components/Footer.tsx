@@ -8,7 +8,7 @@ const Footer = () => {
   return (
     <footer className="bg-charcoal-black text-footer-text">
       <div className="container mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-4">
           {/* Brand */}
           <div>
             <img 
@@ -16,9 +16,10 @@ const Footer = () => {
               alt="DesignOPack" 
               loading="lazy"
               decoding="async"
-              className="h-32 md:h-36 w-auto mb-4"
+              // width-focused sizing so logo fills the area and appears larger without changing footer height
+              className="w-36 md:w-44 h-auto mb-2 -mt-2 md:-mt-1"
             />
-            <p className="text-footer-text font-body text-sm leading-relaxed">
+            <p className="text-footer-text font-body text-sm leading-relaxed mt-0">
               Premium customized hospitality & packaging products for luxury hotels and corporate brands.
             </p>
           </div>
@@ -81,8 +82,11 @@ const Footer = () => {
           </div>
         </div>
 
-        {/* Bottom Bar */}
-        <div className="border-t border-gray-600 pt-6 flex flex-col md:flex-row justify-between items-center gap-4">
+        {/* Divider directly under the paragraph to remove extra gap and align with brand text */}
+        <hr className="border-t border-gray-600 mt-4 mb-4" />
+
+        {/* Bottom Bar (removed border-top here so divider above controls the line position) */}
+        <div className="pt-4 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-footer-text font-body text-sm text-center md:text-left">
             © {currentYear} DesignOPack. All rights reserved. Made with ❤️ in India
           </p>
