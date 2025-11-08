@@ -65,19 +65,19 @@ const About = () => {
           <div className="prose prose-lg mx-auto animate-fade-in">
 
             <p className="text-lg font-body leading-relaxed text-foreground mb-6">
-              <strong>Designopack</strong> is a <strong>Delhi-based manufacturer</strong> specializing in <strong>customized luxury packaging</strong> and <strong>presentation products</strong> for the hospitality and corporate industries. We design and produce a premium range of products in <strong>Leatherette, Resin, Paper (Kraft/SBS), Kappa Board, Jute, Cane, Felt Fabric,</strong> and <strong>MDF Wood</strong> — each crafted to deliver exceptional quality, elegance, and functionality.
+              <strong className="text-primary font-heading font-extrabold">Designopack</strong> is a <strong className="text-primary">Delhi-based manufacturer</strong> specializing in <strong className="text-primary">customized luxury packaging</strong> and <strong className="text-primary">presentation products</strong> for the hospitality and corporate industries. We design and produce a premium range of products in <strong className="text-primary">Leatherette, Resin, Paper (Kraft/SBS), Kappa Board, Jute, Cane, Felt Fabric,</strong> and <strong className="text-primary">MDF Wood</strong> — each crafted to deliver exceptional quality, elegance, and functionality.
             </p>
 
             <p className="text-lg font-body leading-relaxed text-foreground mb-6">
-              With <strong>years of experience</strong> and a strong focus on design excellence, we’ve proudly partnered with <strong>leading hotel chains across India</strong>, including <strong>Taj, ITC Hotels, Hyatt, Radisson, Fairmont, Sarovar,</strong> and many more. Our work spans <strong>PAN India</strong>, delivering premium packaging and hotel accessories that enhance the brand identity of luxury properties and corporate brands alike.
+              With <strong className="text-primary">years of experience</strong> and a strong focus on design excellence, we’ve proudly partnered with <strong className="text-primary">leading hotel chains across India</strong>, including <strong className="text-primary">Taj, ITC Hotels, Hyatt, Radisson, Fairmont, Sarovar,</strong> and many more. Our work spans <strong className="text-primary">PAN India</strong>, delivering premium packaging and hotel accessories that enhance the brand identity of luxury properties and corporate brands alike.
             </p>
 
             <p className="text-lg font-body leading-relaxed text-foreground mb-6">
-              Our extensive product range includes <strong>menu folders, bill folders, tissue boxes, trays, room accessories, chocolate boxes, sweet boxes, pizza boxes, carry bags,</strong> and <strong>corporate hampers</strong> — all tailored to reflect the unique personality and aesthetics of each client.
+              Our extensive product range includes <strong className="text-primary">menu folders, bill folders, tissue boxes, trays, room accessories, chocolate boxes, sweet boxes, pizza boxes, carry bags,</strong> and <strong className="text-primary">corporate hampers</strong> — all tailored to reflect the unique personality and aesthetics of each client.
             </p>
 
             <p className="text-lg font-body leading-relaxed text-foreground mb-6">
-              At <strong>Designopack</strong>, our goal is simple: to <strong>create packaging that speaks luxury</strong> and <strong>presentation products that leave a lasting impression</strong>. We combine <strong>innovative design, durable materials,</strong> and <strong>precise craftsmanship</strong> to ensure every product reflects the premium quality our clients stand for.
+              At <strong className="text-primary font-heading font-extrabold">Designopack</strong>, our goal is simple: to <strong className="text-primary">create packaging that speaks luxury</strong> and <strong className="text-primary">presentation products that leave a lasting impression</strong>. We combine <strong className="text-primary">innovative design, durable materials,</strong> and <strong className="text-primary">precise craftsmanship</strong> to ensure every product reflects the premium quality our clients stand for.
             </p>
 
             <div className="bg-card p-8 rounded-lg my-12 border-l-4 border-primary">
