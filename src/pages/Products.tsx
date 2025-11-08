@@ -206,13 +206,14 @@ const Products = () => {
                   className="group overflow-hidden hover-lift animate-scale-in relative"
                   style={{ animationDelay: `${index * 50}ms` }}
                 >
-                  <div className="relative h-72 overflow-hidden">
+                  {/* use a taller image container (h-60) and remove extra padding per request */}
+                  <div className="relative h-60 overflow-hidden flex items-center justify-center bg-white">
                     <img
                       src={product.imageUrl}
                       alt={product.name}
                       loading="lazy"
                       decoding="async"
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                      className="max-w-full max-h-full object-contain transition-transform duration-500 group-hover:scale-105"
                       onError={(e) => {
                         const target = e.target as HTMLImageElement;
                         target.src = "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=600&q=80";
