@@ -10,6 +10,7 @@ import {
   Sparkles
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 
 const About = () => {
   const values = [
@@ -56,16 +57,27 @@ const About = () => {
         </div>
       </section>
 
+      
+
       {/* Main Content */}
       <section className="py-20 px-4">
         <div className="container mx-auto max-w-4xl">
           <div className="prose prose-lg mx-auto animate-fade-in">
+
             <p className="text-lg font-body leading-relaxed text-foreground mb-6">
-              <strong className="font-heading text-primary">DesignOPack</strong> is a Delhi-based manufacturer specializing in customized luxury packaging and presentation products for the hospitality and corporate industries. We design and produce an exclusive range of items in <strong>Leatherette, Resin, Paper (Kraft/SBS), Kappa Board, Jute, Cane, Felt Fabric, and MDF Wood</strong> — all crafted to reflect premium quality and attention to detail.
+              <strong className="font-heading text-primary">DesignOPack is a Delhi-based manufacturer of luxury packaging and hospitality products, delivering customized solutions PAN India.</strong> We specialize in <strong>premium-quality packaging, presentation, and gifting products</strong> for the hospitality and corporate sectors. Our collections are crafted from <strong>Leatherette, Resin, Paper (Kraft/SBS), Kappa Board, Jute, Cane, Felt Fabric, and MDF Wood</strong>, ensuring superior quality, durability, and refined aesthetics.
             </p>
 
             <p className="text-lg font-body leading-relaxed text-foreground mb-6">
-              With years of expertise, we've become a trusted partner for India's leading hotel chains, including <strong className="text-primary">Taj, Hyatt, Radisson, Fairmont, Sarovar</strong>, and many more. From elegant menu folders, trays, tissue boxes, bill folders, and room accessories to chocolate boxes, sweet boxes, pizza boxes, carry bags, and corporate hampers, every product is designed to enhance the brand experience of our clients.
+              With years of expertise, we have earned the trust of India’s <strong>leading hotel chains</strong> — including <strong className="text-primary">Taj, ITC, Hyatt, Radisson, Fairmont, Sarovar</strong>, and many more. From <strong>menu folders, bill folders, trays, tissue boxes, and room accessories</strong> to <strong>chocolate boxes, sweet boxes, pizza boxes, carry bags, and corporate hampers</strong>, every <strong className="font-heading text-primary">DesignOPack</strong> product blends functionality with elegance.
+            </p>
+
+            <p className="text-lg font-body leading-relaxed text-foreground mb-6">
+              Operating <strong>across India</strong>, we take pride in offering <strong>tailor-made luxury packaging solutions</strong> that enhance brand value and elevate presentation.
+            </p>
+
+            <p className="text-lg font-body leading-relaxed text-foreground mb-6">
+              At <strong className="font-heading text-primary">DesignOPack</strong>, our mission is to combine <strong>craftsmanship, innovation, and sustainability</strong> — creating packaging that leaves a lasting impression.
             </p>
 
             <div className="bg-card p-8 rounded-lg my-12 border-l-4 border-primary">
@@ -113,8 +125,60 @@ const About = () => {
         </div>
       </section>
 
-      {/* Contact Details */}
-      <section className="py-20 px-4">
+      {/* FAQ Section */}
+      <section className="py-16">
+        <div className="container mx-auto px-4">
+          <h2 className="text-3xl md:text-4xl font-heading font-bold text-center text-foreground mb-8">
+            Frequently Asked Questions
+          </h2>
+
+          <div className="max-w-3xl mx-auto">
+            <Accordion type="single" collapsible className="rounded-lg bg-card border">
+              <AccordionItem value="q1">
+                <AccordionTrigger className="px-6">
+                  Do you offer customized hotel accessories and packaging?
+                </AccordionTrigger>
+                <AccordionContent className="px-6">
+                  <p className="text-primary font-body">Yes, we design and manufacture fully customized products as per your brand’s theme and requirements.</p>
+                </AccordionContent>
+              </AccordionItem>
+
+              <AccordionItem value="q2">
+                <AccordionTrigger className="px-6">
+                  Can you deliver orders across India?
+                </AccordionTrigger>
+                <AccordionContent className="px-6">
+                  <p className="text-primary font-body">Absolutely! We operate PAN India and ensure safe, on-time delivery to hotels, corporates, and distributors.</p>
+                </AccordionContent>
+              </AccordionItem>
+
+              <AccordionItem value="q3">
+                <AccordionTrigger className="px-6">
+                  What materials do you work with?
+                </AccordionTrigger>
+                <AccordionContent className="px-6">
+                  <p className="text-primary font-body">We specialize in Leatherette, Resin, Kraft/SBS Paper, Kappa Board, Jute, Cane, Felt Fabric, and MDF Wood.</p>
+                </AccordionContent>
+              </AccordionItem>
+
+              <AccordionItem value="q4">
+                <AccordionTrigger className="px-6">
+                  Who are your major clients?
+                </AccordionTrigger>
+                <AccordionContent className="px-6">
+                  <p className="text-primary font-body">We proudly work with top hotel groups like Taj, ITC, Hyatt, Radisson, Fairmont, and Sarovar among others.</p>
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
+          </div>
+        </div>
+      </section>
+
+  {/* Spacer / separator between FAQ and Visit Us */}
+  <div className="h-12" />
+
+  {/* Contact Details (Visit Us) - make background white to visually separate */}
+  <section className="py-20 px-4 bg-white">
         <div className="container mx-auto">
           <h2 className="text-3xl md:text-4xl font-heading font-bold text-center text-foreground mb-12">
             Visit Us
