@@ -11,15 +11,15 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-4">
           {/* Brand */}
           <div>
-            <img 
-              src={logo} 
-              alt="DesignOPack" 
+            <img
+              src={logo}
+              alt="DesignOPack"
               loading="lazy"
               decoding="async"
-              // width-focused sizing so logo fills the area and appears larger without changing footer height
-              className="w-36 md:w-44 h-auto mb-2 -mt-2 md:-mt-1"
+              // make logo wider (approx 180px on small, 220px on md+), reduce vertical spacing so it appears closer to text
+              className="w-[180px] md:w-[220px] h-auto mb-0 -mt-3 md:-mt-2"
             />
-            <p className="text-footer-text font-body text-sm leading-relaxed mt-0">
+            <p className="text-footer-text font-body text-sm leading-relaxed mt-1">
               Premium customized hospitality & packaging products for luxury hotels and corporate brands.
             </p>
           </div>
