@@ -176,6 +176,10 @@ const AdminQuotes = () => {
   const openQuoteDetail = (quote: QuoteRequest) => {
     setSelectedQuote(quote);
     setIsDetailModalOpen(true);
+    // If the quote is new, mark it as contacted (so it is removed from New Requests count)
+    if (quote.status === 'new' && quote.id) {
+      handleStatusUpdate(quote.id, 'contacted');
+    }
   };
 
   if (loading) {
@@ -207,20 +211,6 @@ const AdminQuotes = () => {
       icon: AlertCircle,
       color: "text-red-600",
       bgColor: "bg-red-50",
-    },
-    {
-      title: "In Progress",
-      value: quotes.filter(q => q.status === 'contacted' || q.status === 'quoted').length,
-      icon: Clock,
-      color: "text-yellow-600",
-      bgColor: "bg-yellow-50",
-    },
-    {
-      title: "Closed",
-      value: quotes.filter(q => q.status === 'closed').length,
-      icon: CheckCircle,
-      color: "text-green-600",
-      bgColor: "bg-green-50",
     },
   ];
 
@@ -277,9 +267,6 @@ const AdminQuotes = () => {
                 <SelectContent>
                   <SelectItem value="all">All Status</SelectItem>
                   <SelectItem value="new">New</SelectItem>
-                  <SelectItem value="contacted">Contacted</SelectItem>
-                  <SelectItem value="quoted">Quoted</SelectItem>
-                  <SelectItem value="closed">Closed</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -339,35 +326,30 @@ const AdminQuotes = () => {
                         </div>
                       </div>
                       <div className="flex items-center gap-3">
-                        <div className={`px-3 py-1 rounded-full text-sm font-medium border ${getStatusColor(quote.status)} flex items-center gap-1`}>
-                          {getStatusIcon(quote.status)}
-                          {quote.status.charAt(0).toUpperCase() + quote.status.slice(1)}
-                        </div>
-                        <Select
-                          value={quote.status}
-                          onValueChange={(value) => handleStatusUpdate(quote.id!, value as QuoteRequest['status'])}
-                        >
-                          <SelectTrigger className="w-36" onClick={(e) => e.stopPropagation()}>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="new">New</SelectItem>
-                            <SelectItem value="contacted">Contacted</SelectItem>
-                            <SelectItem value="quoted">Quoted</SelectItem>
-                            <SelectItem value="closed">Closed</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleDeleteQuote(quote.id!, quote.name);
-                          }}
-                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
+                          <div className="flex items-center gap-2">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                openQuoteDetail(quote);
+                              }}
+                              className="flex items-center gap-2"
+                            >
+                              Read
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDeleteQuote(quote.id!, quote.name);
+                              }}
+                              className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </div>
                       </div>
                     </div>
 
@@ -462,42 +444,22 @@ const AdminQuotes = () => {
                   </div>
                 </div>
 
-                <div className="flex justify-between pt-4">
-                  <div className="flex gap-2">
-                    <Button
-                      variant="outline"
-                      onClick={() => window.open(`mailto:${selectedQuote.email}`, '_blank')}
-                      className="flex items-center gap-2"
-                    >
-                      <Mail className="w-4 h-4" />
-                      Email Customer
-                    </Button>
-                    <Button
-                      variant="outline"
-                      onClick={() => window.open(`tel:${selectedQuote.phone}`, '_blank')}
-                      className="flex items-center gap-2"
-                    >
-                      <Phone className="w-4 h-4" />
-                      Call Customer
-                    </Button>
-                  </div>
-                  <Select
-                    value={selectedQuote.status}
-                    onValueChange={(value) => {
-                      handleStatusUpdate(selectedQuote.id!, value as QuoteRequest['status']);
-                      setSelectedQuote({ ...selectedQuote, status: value as QuoteRequest['status'] });
+                <div className="flex justify-end pt-4">
+                  <Button
+                    variant="outline"
+                    className="text-red-600"
+                    onClick={() => {
+                      if (selectedQuote?.id) {
+                        // Confirm from modal as well
+                        if (confirm(`Are you sure you want to delete the quote request from ${selectedQuote.name}? This action cannot be undone.`)) {
+                          handleDeleteQuote(selectedQuote.id, selectedQuote.name);
+                          setIsDetailModalOpen(false);
+                        }
+                      }
                     }}
                   >
-                    <SelectTrigger className="w-36">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="new">New</SelectItem>
-                      <SelectItem value="contacted">Contacted</SelectItem>
-                      <SelectItem value="quoted">Quoted</SelectItem>
-                      <SelectItem value="closed">Closed</SelectItem>
-                    </SelectContent>
-                  </Select>
+                    Delete
+                  </Button>
                 </div>
               </div>
             )}
