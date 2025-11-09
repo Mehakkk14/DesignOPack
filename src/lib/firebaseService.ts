@@ -425,54 +425,6 @@ export const initializeDefaultBanners = async () => {
 };
 
 // Initialize sample products for testing
-export const initializeSampleProducts = async () => {
-  try {
-    console.log('🔄 Checking if sample products need to be initialized...');
-    const { success, products } = await getProducts();
-    if (success && products.length === 0) {
-      console.log('📦 No products found, creating sample products...');
-      
-      const sampleProducts = [
-        {
-          name: "Luxury Tissue Box",
-          categories: ["IN-ROOM ACCESSORIES", "BATHROOM ACCESSORIES"],
-          description: "Premium leatherette tissue box with elegant finish",
-          imageUrl: "https://images.unsplash.com/photo-1584464491033-06628f3a6b7b?w=800&q=80",
-          price: 1200,
-          inStock: true
-        },
-        {
-          name: "Executive Menu Folder",
-          categories: ["RESTAURANT & BAR ACCESSORIES"],
-          description: "High-quality menu folder with custom branding options",
-          imageUrl: "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&q=80",
-          price: 800,
-          inStock: true
-        },
-        {
-          name: "Premium Gift Hamper Box",
-          categories: ["GIFTING", "FOOD PACKAGING"],
-          description: "Elegant gift packaging solution for luxury items",
-          imageUrl: "https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=800&q=80",
-          inStock: true
-        }
-      ];
-      
-      for (const product of sampleProducts) {
-        await addProduct(product as Product);
-      }
-      
-      console.log('✅ Sample products initialized successfully');
-      return { success: true, message: "Sample products initialized" };
-    }
-    console.log('ℹ️ Products already exist, skipping initialization');
-    return { success: true, message: "Products already exist" };
-  } catch (error) {
-    console.error('❌ Error initializing sample products:', error);
-    return { success: false, error };
-  }
-};
-
 // ===== CATEGORY FUNCTIONS =====
 
 export const getCategories = async () => {

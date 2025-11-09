@@ -220,8 +220,8 @@ const AdminQuotes = () => {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Quote Requests</h1>
-            <p className="text-gray-600 mt-2">Manage customer quote requests and inquiries</p>
+            <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Quote Requests</h1>
+            <p className="text-sm md:text-base text-gray-600 mt-1 md:mt-2">Manage customer quote requests and inquiries</p>
           </div>
         </div>
 
@@ -249,19 +249,19 @@ const AdminQuotes = () => {
 
         {/* Filters */}
         <Card>
-          <CardContent className="p-6">
-            <div className="flex gap-4 items-center">
+          <CardContent className="p-4 md:p-6">
+            <div className="flex flex-col sm:flex-row gap-3 md:gap-4 items-stretch sm:items-center">
               <div className="flex-1 relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                 <Input
-                  placeholder="Search by name, email, or message..."
+                  placeholder="Search..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-10"
                 />
               </div>
               <Select value={filterStatus} onValueChange={setFilterStatus}>
-                <SelectTrigger className="w-48">
+                <SelectTrigger className="w-full sm:w-48">
                   <SelectValue placeholder="All Status" />
                 </SelectTrigger>
                 <SelectContent>
@@ -297,83 +297,83 @@ const AdminQuotes = () => {
                 {filteredQuotes.map((quote) => (
                   <div
                     key={quote.id}
-                    className="border rounded-lg p-6 hover:shadow-md transition-shadow cursor-pointer"
+                    className="border rounded-lg p-4 md:p-6 hover:shadow-md transition-shadow cursor-pointer"
                     onClick={() => openQuoteDetail(quote)}
                   >
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center">
+                    <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-4">
+                      <div className="flex items-start gap-3 min-w-0 flex-1">
+                        <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center flex-shrink-0">
                           <User className="w-5 h-5 text-gray-600" />
                         </div>
-                        <div>
-                          <h3 className="font-semibold text-gray-900">{quote.name}</h3>
-                          <div className="flex items-center gap-4 text-sm text-gray-500 mt-1">
-                            <div className="flex items-center gap-1">
-                              <Mail className="w-4 h-4" />
-                              {quote.email}
+                        <div className="min-w-0 flex-1">
+                          <h3 className="font-semibold text-gray-900 text-base md:text-lg truncate">{quote.name}</h3>
+                          <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4 text-xs md:text-sm text-gray-500 mt-1">
+                            <div className="flex items-center gap-1 truncate">
+                              <Mail className="w-3 h-3 md:w-4 md:h-4 flex-shrink-0" />
+                              <span className="truncate">{quote.email}</span>
                             </div>
                             <div className="flex items-center gap-1">
-                              <Phone className="w-4 h-4" />
-                              {quote.phone}
+                              <Phone className="w-3 h-3 md:w-4 md:h-4 flex-shrink-0" />
+                              <span>{quote.phone}</span>
                             </div>
                             {quote.companyName && (
-                              <div className="flex items-center gap-1">
-                                <Building className="w-4 h-4" />
-                                {quote.companyName}
+                              <div className="flex items-center gap-1 truncate">
+                                <Building className="w-3 h-3 md:w-4 md:h-4 flex-shrink-0" />
+                                <span className="truncate">{quote.companyName}</span>
                               </div>
                             )}
                           </div>
                         </div>
                       </div>
-                      <div className="flex items-center gap-3">
-                          <div className="flex items-center gap-2">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                openQuoteDetail(quote);
-                              }}
-                              className="flex items-center gap-2"
-                            >
-                              Read
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleDeleteQuote(quote.id!, quote.name);
-                              }}
-                              className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
-                          </div>
+                      <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0 self-start">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              openQuoteDetail(quote);
+                            }}
+                            className="flex items-center gap-2 text-xs md:text-sm px-2 md:px-3"
+                          >
+                            Read
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteQuote(quote.id!, quote.name);
+                            }}
+                            className="text-red-600 hover:text-red-700 hover:bg-red-50 px-2 md:px-3"
+                          >
+                            <Trash2 className="w-3 h-3 md:w-4 md:h-4" />
+                          </Button>
                       </div>
                     </div>
 
                     {quote.product && (
                       <div className="flex items-center gap-2 mb-3">
-                        <Package className="w-4 h-4 text-gray-500" />
-                        <span className="text-sm text-gray-600">Product: {quote.product}</span>
+                        <Package className="w-3 h-3 md:w-4 md:h-4 text-gray-500 flex-shrink-0" />
+                        <span className="text-xs md:text-sm text-gray-600 truncate">Product: {quote.product}</span>
                       </div>
                     )}
 
-                    <p className="text-gray-700 text-sm line-clamp-2 mb-3">
+                    <p className="text-gray-700 text-xs md:text-sm line-clamp-2 mb-3">
                       {quote.message}
                     </p>
 
                     <div className="flex items-center gap-4 text-xs text-gray-500">
                       <div className="flex items-center gap-1">
-                        <Calendar className="w-3 h-3" />
-                        {quote.createdAt?.toLocaleDateString('en-US', {
-                          year: 'numeric',
-                          month: 'short',
-                          day: 'numeric',
-                          hour: '2-digit',
-                          minute: '2-digit'
-                        })}
+                        <Calendar className="w-3 h-3 flex-shrink-0" />
+                        <span className="truncate">
+                          {quote.createdAt?.toLocaleDateString('en-US', {
+                            year: 'numeric',
+                            month: 'short',
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          })}
+                        </span>
                       </div>
                     </div>
                   </div>

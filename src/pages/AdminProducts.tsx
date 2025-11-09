@@ -67,13 +67,6 @@ const AdminProducts = () => {
       setLoading(false);
       await loadProducts();
       await loadCategories();
-      
-      // Initialize sample products if none exist
-      import("@/lib/firebaseService").then(({ initializeSampleProducts }) => {
-        initializeSampleProducts().then(() => {
-          loadProducts(); // Reload products after initialization
-        });
-      });
     });
 
     return () => unsubscribe();
