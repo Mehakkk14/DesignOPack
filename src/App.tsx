@@ -19,6 +19,7 @@ import Footer from "./components/Footer";
 import WhatsAppButton from "./components/WhatsAppButton";
 import ScrollToTop from "./components/ScrollToTop";
 import ProtectedRoute from "./components/ProtectedRoute";
+import PageLoader from "./components/PageLoader";
 
 const queryClient = new QueryClient();
 
@@ -56,6 +57,7 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
+        <PageLoader />
         <AppContent />
       </BrowserRouter>
     </TooltipProvider>
