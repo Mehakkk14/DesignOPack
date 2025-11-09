@@ -238,19 +238,19 @@ const AdminBanners = () => {
     <AdminLayout>
       <div className="space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Banner Management</h1>
-            <p className="text-gray-600 mt-2">Manage home page banners and their display order (Maximum 8 banners)</p>
+            <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Banner Management</h1>
+            <p className="text-sm md:text-base text-gray-600 mt-1 md:mt-2">Manage home page banners (Max 8)</p>
           </div>
           <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
             <DialogTrigger asChild>
               <Button 
-                className="bg-gradient-to-r from-gray-900 to-gray-700 hover:from-gray-800 hover:to-gray-600"
+                className="bg-gradient-to-r from-gray-900 to-gray-700 hover:from-gray-800 hover:to-gray-600 w-full sm:w-auto"
                 disabled={banners.length >= 8}
               >
                 <Plus className="w-4 h-4 mr-2" />
-                Add Banner {banners.length >= 8 && "(Max Reached)"}
+                Add Banner {banners.length >= 8 && "(Max)"}
               </Button>
             </DialogTrigger>
             <DialogContent className="max-w-md">
@@ -309,54 +309,54 @@ const AdminBanners = () => {
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6">
           <Card>
-            <CardContent className="p-6">
+            <CardContent className="p-4 md:p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-600">Total Banners</p>
-                  <p className="text-3xl font-bold text-gray-900">{banners.length}/8</p>
+                  <p className="text-xs md:text-sm text-gray-600">Total</p>
+                  <p className="text-2xl md:text-3xl font-bold text-gray-900">{banners.length}/8</p>
                 </div>
-                <ImageIcon className="w-8 h-8 text-blue-500" />
+                <ImageIcon className="w-6 h-6 md:w-8 md:h-8 text-blue-500" />
               </div>
             </CardContent>
           </Card>
           <Card>
-            <CardContent className="p-6">
+            <CardContent className="p-4 md:p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-600">Active Banners</p>
-                  <p className="text-3xl font-bold text-green-600">
+                  <p className="text-xs md:text-sm text-gray-600">Active</p>
+                  <p className="text-2xl md:text-3xl font-bold text-green-600">
                     {banners.filter(b => b.isActive).length}
                   </p>
                 </div>
-                <Eye className="w-8 h-8 text-green-500" />
+                <Eye className="w-6 h-6 md:w-8 md:h-8 text-green-500" />
               </div>
             </CardContent>
           </Card>
           <Card>
-            <CardContent className="p-6">
+            <CardContent className="p-4 md:p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-600">Inactive Banners</p>
-                  <p className="text-3xl font-bold text-gray-500">
+                  <p className="text-xs md:text-sm text-gray-600">Inactive</p>
+                  <p className="text-2xl md:text-3xl font-bold text-gray-500">
                     {banners.filter(b => !b.isActive).length}
                   </p>
                 </div>
-                <EyeOff className="w-8 h-8 text-gray-400" />
+                <EyeOff className="w-6 h-6 md:w-8 md:h-8 text-gray-400" />
               </div>
             </CardContent>
           </Card>
           <Card>
-            <CardContent className="p-6">
+            <CardContent className="p-4 md:p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-600">Available Slots</p>
-                  <p className={`text-3xl font-bold ${8 - banners.length > 0 ? 'text-blue-600' : 'text-red-600'}`}>
+                  <p className="text-xs md:text-sm text-gray-600">Slots</p>
+                  <p className={`text-2xl md:text-3xl font-bold ${8 - banners.length > 0 ? 'text-blue-600' : 'text-red-600'}`}>
                     {8 - banners.length}
                   </p>
                 </div>
-                <Plus className="w-8 h-8 text-blue-400" />
+                <Plus className="w-6 h-6 md:w-8 md:h-8 text-blue-400" />
               </div>
             </CardContent>
           </Card>
@@ -381,9 +381,9 @@ const AdminBanners = () => {
                 {banners.map((banner) => (
                   <div
                     key={banner.id}
-                    className="flex items-center gap-4 p-4 border rounded-lg hover:shadow-md transition-shadow"
+                    className="flex flex-col sm:flex-row items-start sm:items-center gap-3 p-3 md:p-4 border rounded-lg hover:shadow-md transition-shadow"
                   >
-                    <GripVertical className="w-5 h-5 text-gray-400 cursor-move" />
+                    <GripVertical className="w-5 h-5 text-gray-400 cursor-move hidden sm:block flex-shrink-0" />
                     
                     <div className="w-20 h-12 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
                       <img
@@ -398,11 +398,11 @@ const AdminBanners = () => {
                     </div>
 
                     <div className="flex-1 min-w-0">
-                      <h3 className="font-semibold text-gray-900 truncate">{banner.title}</h3>
-                      <p className="text-sm text-gray-500">Order: {banner.order}</p>
+                      <h3 className="font-semibold text-sm md:text-base text-gray-900 truncate">{banner.title}</h3>
+                      <p className="text-xs md:text-sm text-gray-500">Or {banner.order}</p>
                     </div>
 
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
                       <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
                         banner.isActive 
                           ? "bg-green-100 text-green-700" 
@@ -415,6 +415,7 @@ const AdminBanners = () => {
                         variant="ghost"
                         size="sm"
                         onClick={() => handleToggleActive(banner)}
+                        className="p-2"
                       >
                         {banner.isActive ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                       </Button>
@@ -423,13 +424,14 @@ const AdminBanners = () => {
                         variant="ghost" 
                         size="sm"
                         onClick={() => handleEditBanner(banner)}
+                        className="p-2"
                       >
                         <Edit2 className="w-4 h-4" />
                       </Button>
                       
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
-                          <Button variant="ghost" size="sm" className="text-red-600 hover:text-red-700">
+                          <Button variant="ghost" size="sm" className="text-red-600 hover:text-red-700 p-2">
                             <Trash2 className="w-4 h-4" />
                           </Button>
                         </AlertDialogTrigger>
