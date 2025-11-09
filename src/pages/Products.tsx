@@ -30,14 +30,6 @@ const Products = () => {
   useEffect(() => {
     loadProducts();
     loadCategories();
-    
-    // Initialize sample products if needed
-    import("@/lib/firebaseService").then(({ initializeSampleProducts }) => {
-      initializeSampleProducts().then(() => {
-        // Reload products after potential initialization
-        setTimeout(() => loadProducts(), 1000);
-      });
-    });
   }, []);
 
   const loadProducts = async () => {
