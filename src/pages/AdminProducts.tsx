@@ -46,6 +46,7 @@ const AdminProducts = () => {
   const [filterCategory, setFilterCategory] = useState("all");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [newlyAddedProductId, setNewlyAddedProductId] = useState<string | null>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -150,12 +151,17 @@ const AdminProducts = () => {
           title: "Success",
           description: "Product updated successfully",
         });
+        setNewlyAddedProductId(editingProduct.id);
       } else {
         console.log('🔄 AdminProducts: Adding new product');
         const result = await addProduct(productData);
         console.log('✅ AdminProducts: Product add result:', result);
         if (!result.success) {
           throw new Error(result.error || 'Failed to add product');
+        }
+        // Track the newly added product ID for animation
+        if (result.id) {
+          setNewlyAddedProductId(result.id);
         }
         toast({
           title: "Success",
@@ -164,11 +170,11 @@ const AdminProducts = () => {
       }
       resetForm();
       setIsDialogOpen(false);
-      console.log('🔄 AdminProducts: Reloading products after save...');
-      // Wait a bit before reloading to ensure Firestore is updated
-      setTimeout(() => {
-        loadProducts();
-      }, 500);
+      console.log('🔄 AdminProducts: Reloading products after save (keeping filters)...');
+      // Reload products without resetting filters - products will appear in sorted position
+      await loadProducts();
+      // Clear the newly added indicator after animation completes (1s animation + 200ms buffer)
+      setTimeout(() => setNewlyAddedProductId(null), 1200);
     } catch (error) {
       console.error("Error saving product:", error);
       toast({
@@ -220,6 +226,17 @@ const AdminProducts = () => {
       price: undefined,
     });
     setEditingProduct(null);
+  };
+
+  const handleAddProductClick = () => {
+    // When opening dialog for new product, auto-assign filtered category
+    if (filterCategory !== "all") {
+      setFormData(prev => ({
+        ...prev,
+        categories: [filterCategory]
+      }));
+    }
+    setIsDialogOpen(true);
   };
 
   const filteredProducts = products.filter((product) => {
@@ -277,7 +294,10 @@ const AdminProducts = () => {
               if (!open) resetForm();
             }}>
               <DialogTrigger asChild>
-                <Button className="bg-gradient-to-r from-gray-900 to-gray-700 hover:from-gray-800 hover:to-gray-600">
+                <Button 
+                  className="bg-gradient-to-r from-gray-900 to-gray-700 hover:from-gray-800 hover:to-gray-600"
+                  onClick={handleAddProductClick}
+                >
                   <Plus className="mr-2 h-4 w-4" />
                   Add Product
                 </Button>
@@ -415,6 +435,10 @@ const AdminProducts = () => {
 
       {/* Products Table */}
       <div className="bg-white rounded-lg border">
+        {/* Info banner */}
+        <div className="px-4 py-2 bg-gray-50 border-b border-gray-200 text-sm text-gray-600">
+          <span className="font-medium">ℹ️ Products are sorted by:</span> Category (alphabetically) → Date Added (oldest first)
+        </div>
         {loading ? (
           <div className="p-8 text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto"></div>
@@ -443,7 +467,14 @@ const AdminProducts = () => {
             </TableHeader>
             <TableBody>
               {filteredProducts.map((product) => (
-                <TableRow key={product.id}>
+                <TableRow 
+                  key={product.id}
+                  className={`${
+                    newlyAddedProductId === product.id 
+                      ? 'animate-new-product' 
+                      : ''
+                  }`}
+                >
                   <TableCell>
                     <img
                       src={product.imageUrl}

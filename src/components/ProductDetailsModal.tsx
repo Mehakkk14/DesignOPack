@@ -43,13 +43,14 @@ const ProductDetailsModal = ({
 
           <div className="space-y-6">
             {/* Main Product Image */}
-            <div className="relative w-full flex justify-center overflow-hidden rounded-lg bg-muted">
+            <div className="relative w-full flex justify-center overflow-hidden rounded-lg bg-muted py-8">
               <img
                 src={productImages[selectedImageIndex]}
                 alt={`${productName} - View ${selectedImageIndex + 1}`}
                 loading="lazy"
                 decoding="async"
-                className="w-full max-w-md h-auto object-contain"
+                className="w-full h-auto object-contain"
+                style={{ maxHeight: '600px' }}
               />
             </div>
 

@@ -92,8 +92,8 @@ export const addProduct = async (product: Product) => {
 export const getProducts = async () => {
   try {
     console.log('🔍 Fetching products from Firestore...');
-    const q = query(collection(db, productsCollection), orderBy('createdAt', 'desc'));
-    const querySnapshot = await getDocs(q);
+    // Fetch all products without Firestore ordering (we'll sort in memory)
+    const querySnapshot = await getDocs(collection(db, productsCollection));
     const products: Product[] = [];
     
     querySnapshot.forEach((doc) => {
@@ -105,7 +105,23 @@ export const getProducts = async () => {
       } as Product);
     });
     
-    console.log(`✅ Successfully loaded ${products.length} products:`, products);
+    // Sort products by category name (alphabetically), then by createdAt (oldest first within each category)
+    products.sort((a, b) => {
+      // Get the first category name for each product (for primary sorting)
+      const categoryA = (a.categories && a.categories.length > 0 ? a.categories[0] : '').toLowerCase();
+      const categoryB = (b.categories && b.categories.length > 0 ? b.categories[0] : '').toLowerCase();
+      
+      // First, sort by category name
+      if (categoryA < categoryB) return -1;
+      if (categoryA > categoryB) return 1;
+      
+      // If categories are the same, sort by createdAt (ascending - oldest first)
+      const timeA = a.createdAt?.getTime() || 0;
+      const timeB = b.createdAt?.getTime() || 0;
+      return timeA - timeB;
+    });
+    
+    console.log(`✅ Successfully loaded ${products.length} products (sorted by category → timestamp):`, products);
     return { success: true, products };
   } catch (error) {
     console.error('❌ Error getting products:', error);
