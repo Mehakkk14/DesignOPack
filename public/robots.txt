@@ -12,3 +12,9 @@ Allow: /
 
 User-agent: *
 Allow: /
+
+# Sitemap Location
+Sitemap: https://designopack.com/sitemap.xml
+
+# Crawl Delay for respectful crawling
+Crawl-delay: 10
