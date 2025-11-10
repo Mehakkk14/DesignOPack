@@ -1,6 +1,7 @@
 import { useState } from "react";
 import emailjs from "@emailjs/browser";
 import { addQuoteRequest } from "@/lib/firebaseService";
+import { logger } from "@/lib/logger";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -54,11 +55,11 @@ From: DesignOPack Website Contact Form
           to_name: "DesignOPack Team",
         }, publicKey);
         
-        console.log("Contact email sent via EmailJS successfully");
+        logger.log("Contact email sent via EmailJS successfully");
         return true;
       }
     } catch (emailError) {
-      console.log("EmailJS failed:", emailError);
+      logger.warn("EmailJS failed:", emailError);
     }
 
     // Method 2: Try FormSubmit (no signup required)
@@ -79,11 +80,11 @@ From: DesignOPack Website Contact Form
       });
 
       if (response.ok) {
-        console.log("Contact email sent via FormSubmit successfully");
+        logger.log("Contact email sent via FormSubmit successfully");
         return true;
       }
     } catch (formSubmitError) {
-      console.log("FormSubmit failed:", formSubmitError);
+      logger.warn("FormSubmit failed:", formSubmitError);
     }
 
     // Method 3: Create mailto link as ultimate fallback
@@ -91,10 +92,10 @@ From: DesignOPack Website Contact Form
     
     try {
       window.open(mailtoLink, '_blank');
-      console.log("Opened mailto link as fallback");
+      logger.log("Opened mailto link as fallback");
       return true;
     } catch (mailtoError) {
-      console.log("Mailto failed:", mailtoError);
+      logger.warn("Mailto failed:", mailtoError);
     }
 
     return false;
@@ -127,7 +128,7 @@ From: DesignOPack Website Contact Form
     setIsSubmitting(true);
 
     try {
-      console.log("🔄 Submitting contact form:", formData);
+      logger.emoji.loading("🔄 Submitting contact form:", formData);
 
       // Step 1: Save to Firebase first
       const firebaseResult = await addQuoteRequest({
@@ -139,17 +140,17 @@ From: DesignOPack Website Contact Form
       });
 
       if (!firebaseResult.success) {
-        console.error("❌ Firebase save failed:", firebaseResult.error);
+        logger.emoji.error("❌ Firebase save failed:", firebaseResult.error);
         throw new Error("Failed to save contact request");
       }
 
-      console.log("✅ Contact saved to Firebase successfully with ID:", firebaseResult.id);
+      logger.emoji.loading("✅ Contact saved to Firebase successfully with ID:", firebaseResult.id);
 
       // Step 2: Send email notification
       const emailSent = await sendEmailFallback(formData);
 
       if (emailSent) {
-        console.log("✅ Contact email sent successfully");
+        logger.emoji.loading("✅ Contact email sent successfully");
         toast({
           title: "Message Sent Successfully! ✅",
           description: "Thank you for contacting us! We'll get back to you within 24 hours.",
@@ -169,7 +170,7 @@ From: DesignOPack Website Contact Form
         message: "",
       });
     } catch (error) {
-      console.error("❌ Contact form submission error:", error);
+      logger.emoji.error("❌ Contact form submission error:", error);
       toast({
         title: "Submission Failed",
         description: "Unable to send your message. Please try again or call us directly at +91-9868176361",

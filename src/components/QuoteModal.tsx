@@ -1,6 +1,7 @@
 import { useState } from "react";
 import emailjs from "@emailjs/browser";
 import { addQuoteRequest } from "@/lib/firebaseService";
+import { logger } from "@/lib/logger";
 import {
   Dialog,
   DialogContent,
@@ -33,7 +34,7 @@ const QuoteModal = ({ isOpen, onClose, productName = "" }: QuoteModalProps) => {
   });
 
   const sendEmailNotification = async (quoteData: any) => {
-    console.log('🔄 Sending email notification for quote request...');
+    logger.emoji.loading('Sending email notification for quote request...');
     
     try {
       // Get EmailJS configuration from environment variables
@@ -46,7 +47,7 @@ const QuoteModal = ({ isOpen, onClose, productName = "" }: QuoteModalProps) => {
           serviceId === 'your_service_id' || 
           templateId === 'your_template_id' || 
           publicKey === 'your_public_key') {
-        console.log('⚠️ EmailJS not configured properly, using fallback methods');
+        logger.warn('EmailJS not configured properly, using fallback methods');
         return await sendEmailFallback(quoteData);
       }
 
@@ -71,26 +72,26 @@ const QuoteModal = ({ isOpen, onClose, productName = "" }: QuoteModalProps) => {
         })
       };
 
-      console.log('📧 Sending email via EmailJS with params:', templateParams);
+      logger.log('Sending email via EmailJS with params:', templateParams);
 
       // Send email using EmailJS
       const response = await emailjs.send(serviceId, templateId, templateParams, publicKey);
       
       if (response.status === 200) {
-        console.log('✅ Email sent successfully via EmailJS');
+        logger.emoji.success('Email sent successfully via EmailJS');
         return true;
       } else {
-        console.error('❌ EmailJS returned non-200 status:', response);
+        logger.error('EmailJS returned non-200 status:', response);
         return await sendEmailFallback(quoteData);
       }
     } catch (emailError) {
-      console.error('❌ EmailJS failed:', emailError);
+      logger.error('EmailJS failed:', emailError);
       return await sendEmailFallback(quoteData);
     }
   };
 
   const sendEmailFallback = async (quoteData: any) => {
-    console.log('🔄 Using fallback email methods...');
+    logger.log('Using fallback email methods...');
     
     // Create comprehensive email content
     const emailSubject = `New Quote Request from ${quoteData.name} - DesignOPack`;
@@ -133,11 +134,11 @@ Please follow up with the customer within 24 hours.
       });
 
       if (formSubmitResponse.ok) {
-        console.log('✅ Email sent via FormSubmit successfully');
+        logger.success('Email sent via FormSubmit successfully');
         return true;
       }
     } catch (formSubmitError) {
-      console.log('⚠️ FormSubmit failed:', formSubmitError);
+      logger.warn('FormSubmit failed:', formSubmitError);
     }
 
     // Method 3: Create mailto link as ultimate fallback
@@ -145,10 +146,10 @@ Please follow up with the customer within 24 hours.
     
     try {
       window.open(mailtoLink, '_blank');
-      console.log('📧 Opened email client for user to send');
+      logger.log('Opened email client for user to send');
       return true;
     } catch (mailtoError) {
-      console.log('⚠️ Mailto failed:', mailtoError);
+      logger.warn('Mailto failed:', mailtoError);
     }
 
     return false;
@@ -181,7 +182,7 @@ Please follow up with the customer within 24 hours.
     setIsSubmitting(true);
 
     try {
-      console.log("🔄 Submitting quote request:", formData);
+      logger.emoji.loading("Submitting quote request:", formData);
       
       // Step 1: Save to Firebase first
       const firebaseResult = await addQuoteRequest({
@@ -194,19 +195,19 @@ Please follow up with the customer within 24 hours.
       });
 
       if (!firebaseResult.success) {
-        console.error("❌ Firebase save failed:", firebaseResult.error);
+        logger.emoji.error("Firebase save failed:", firebaseResult.error);
         throw new Error("Failed to save quote request");
       }
 
-      console.log("✅ Quote saved to Firebase successfully with ID:", firebaseResult.id);
+      logger.emoji.success("Quote saved to Firebase successfully with ID:", firebaseResult.id);
 
       // Step 2: Send email notification  
       const emailSent = await sendEmailNotification(formData);
       
       if (emailSent) {
-        console.log("✅ Email notification sent successfully");
+        logger.emoji.success("Email notification sent successfully");
       } else {
-        console.log("⚠️ Email notification failed, but quote was saved");
+        logger.warn("Email notification failed, but quote was saved");
       }
 
       // Step 3: Show success message
@@ -229,7 +230,7 @@ Please follow up with the customer within 24 hours.
       onClose();
 
     } catch (error) {
-      console.error("❌ Quote submission error:", error);
+      logger.error("Quote submission error:", error);
       toast({
         title: "Submission Failed",
         description: "Unable to submit your request. Please try again or call us directly at +91-9868176361",

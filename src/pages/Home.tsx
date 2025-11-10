@@ -16,6 +16,7 @@ import banner3 from "@/assets/banner3.webp";
 import banner4 from "@/assets/banner4.webp";
 import ctaBackground from "@/assets/cta-background.png";
 import { getActiveBanners, Banner } from "@/lib/firebaseService";
+import { logger } from "@/lib/logger";
 
 import {
   Carousel,
@@ -73,14 +74,14 @@ const Home = () => {
   }, []);
 
   const loadBanners = async () => {
-    console.log('🔄 Home: Loading active banners...');
+    logger.emoji.loading('🔄 Home: Loading active banners...');
     const result = await getActiveBanners();
     if (result.success && result.banners.length > 0) {
-      console.log('✅ Home: Active banners loaded:', result.banners);
+      logger.emoji.loading('✅ Home: Active banners loaded:', result.banners);
       setBanners(result.banners);
       setBannerImages(result.banners.map(banner => banner.imageUrl));
     } else {
-      console.log('⚠️ Home: No active banners found, using static fallback');
+      logger.emoji.loading('⚠️ Home: No active banners found, using static fallback');
       // Use static banners as fallback
       setBannerImages(staticBanners);
     }

@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import ProductDetailsModal from "@/components/ProductDetailsModal";
 import { getProducts, getCategories, Product, Category } from "@/lib/firebaseService";
+import { logger } from "@/lib/logger";
 
 const Products = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
@@ -33,39 +34,39 @@ const Products = () => {
   }, []);
 
   const loadProducts = async () => {
-    console.log('🔄 Products page: Loading products...');
+    logger.emoji.loading('🔄 Products page: Loading products...');
     try {
       const result = await getProducts();
       if (result.success) {
-        console.log('✅ Products page: Products loaded successfully:', result.products);
+        logger.emoji.loading('✅ Products page: Products loaded successfully:', result.products);
         // Clean up products - remove price if it's 0 or null
         const cleanedProducts = result.products.map(product => ({
           ...product,
           price: product.price && product.price > 0 ? product.price : undefined
         }));
         setProducts(cleanedProducts);
-        console.log('✅ Products page: Cleaned products set:', cleanedProducts);
+        logger.emoji.loading('✅ Products page: Cleaned products set:', cleanedProducts);
       } else {
-        console.error('❌ Products page: Failed to load products:', result.error);
+        logger.emoji.error('❌ Products page: Failed to load products:', result.error);
       }
     } catch (error) {
-      console.error('❌ Products page: Error loading products:', error);
+      logger.emoji.error('❌ Products page: Error loading products:', error);
     }
     setLoading(false);
   };
 
   const loadCategories = async () => {
-    console.log('🔄 Products: Loading categories...');
+    logger.emoji.loading('🔄 Products: Loading categories...');
     try {
       const result = await getCategories();
       if (result.success) {
-        console.log('✅ Products: Categories loaded successfully:', result.categories);
+        logger.emoji.loading('✅ Products: Categories loaded successfully:', result.categories);
         setCategories(result.categories);
       } else {
-        console.error('❌ Products: Failed to load categories:', result.error);
+        logger.emoji.error('❌ Products: Failed to load categories:', result.error);
       }
     } catch (error) {
-      console.error('❌ Products: Error loading categories:', error);
+      logger.emoji.error('❌ Products: Error loading categories:', error);
     }
   };
 
@@ -102,7 +103,7 @@ const Products = () => {
     : products.filter(p => p.categories && p.categories.includes(selectedCategory));
 
   // Debug logging
-  console.log('🔍 Products page state:', {
+  logger.emoji.loading('🔍 Products page state:', {
     selectedCategory,
     totalProducts: products.length,
     filteredProducts: filteredProducts.length,

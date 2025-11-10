@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Upload, X, ImageIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { logger } from '@/lib/logger';
 
 interface ImageUploadProps {
   value?: string;
@@ -51,7 +52,7 @@ export function ImageUpload({
       };
       reader.readAsDataURL(file);
     } catch (error) {
-      console.error('Upload failed:', error);
+      logger.error('Upload failed:', error);
       alert('Upload failed. Please try again.');
       setIsUploading(false);
     }
