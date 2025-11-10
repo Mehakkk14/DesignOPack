@@ -117,19 +117,19 @@ const Home = () => {
       icon: Bath,
       title: "Bathroom Equipments",
       description: "Luxury amenities and accessories in Resin and Leatherette finishes",
-      image: "https://images.unsplash.com/photo-1552321554-5fefe8c9ef14?w=800&q=80",
+      image: "/bathroom-equipment.webp",
     },
     {
       icon: Gift,
       title: "Gifting Solutions",
       description: "Customized hampers, photo frames, greeting cards, and corporate gifts",
-      image: "https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=800&q=80",
+      image: "/gifting-solutions.webp",
     },
     {
       icon: ShoppingBag,
       title: "Food Packaging",
       description: "Premium boxes and carry bags in SBS, Kraft, and Kappa Board",
-      image: "https://images.unsplash.com/photo-1607083206869-4c7672e72a8a?w=800&q=80",
+      image: "/food-packaging.webp",
     },
   ];
 
