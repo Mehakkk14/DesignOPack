@@ -12,6 +12,7 @@ import {
   onSnapshot
 } from 'firebase/firestore';
 import { db } from './firebase';
+import { logger } from './logger';
 
 export interface Product {
   id?: string;
@@ -67,31 +68,31 @@ const categoriesCollection = 'categories';
 
 export const addProduct = async (product: Product) => {
   try {
-    console.log('🔄 Adding new product to Firestore:', product);
+    logger.emoji.loading('Adding new product to Firestore:', product);
     
     // Clean the product data to remove undefined values
     const cleanProduct = Object.fromEntries(
       Object.entries(product).filter(([_, value]) => value !== undefined)
     );
     
-    console.log('🔄 Cleaned product data (no undefined):', cleanProduct);
+    logger.debug('Cleaned product data (no undefined):', cleanProduct);
     
     const docRef = await addDoc(collection(db, productsCollection), {
       ...cleanProduct,
       createdAt: Timestamp.now(),
       updatedAt: Timestamp.now(),
     });
-    console.log('✅ Product added successfully with ID:', docRef.id);
+    logger.emoji.success('Product added successfully with ID:', docRef.id);
     return { success: true, id: docRef.id };
   } catch (error) {
-    console.error('❌ Error adding product:', error);
+    logger.emoji.error('Error adding product:', error);
     return { success: false, error };
   }
 };
 
 export const getProducts = async () => {
   try {
-    console.log('🔍 Fetching products from Firestore...');
+    logger.emoji.search('Fetching products from Firestore...');
     // Fetch all products without Firestore ordering (we'll sort in memory)
     const querySnapshot = await getDocs(collection(db, productsCollection));
     const products: Product[] = [];
@@ -121,10 +122,10 @@ export const getProducts = async () => {
       return timeA - timeB;
     });
     
-    console.log(`✅ Successfully loaded ${products.length} products (sorted by category → timestamp):`, products);
+    logger.emoji.success(`Successfully loaded ${products.length} products (sorted by category → timestamp)`);
     return { success: true, products };
   } catch (error) {
-    console.error('❌ Error getting products:', error);
+    logger.emoji.error('Error getting products:', error);
     return { success: false, products: [], error };
   }
 };
@@ -148,31 +149,31 @@ export const getProductById = async (id: string) => {
       return { success: false, error: 'Product not found' };
     }
   } catch (error) {
-    console.error('Error getting product:', error);
+    logger.error('Error getting product:', error);
     return { success: false, error };
   }
 };
 
 export const updateProduct = async (id: string, updates: Partial<Product>) => {
   try {
-    console.log('🔄 Updating product:', id, updates);
+    logger.emoji.loading('Updating product:', id);
     
     // Clean the updates to remove undefined values
     const cleanUpdates = Object.fromEntries(
       Object.entries(updates).filter(([_, value]) => value !== undefined)
     );
     
-    console.log('🔄 Cleaned update data (no undefined):', cleanUpdates);
+    logger.debug('Cleaned update data (no undefined):', cleanUpdates);
     
     const docRef = doc(db, productsCollection, id);
     await updateDoc(docRef, {
       ...cleanUpdates,
       updatedAt: Timestamp.now(),
     });
-    console.log('✅ Product updated successfully');
+    logger.emoji.success('Product updated successfully');
     return { success: true };
   } catch (error) {
-    console.error('❌ Error updating product:', error);
+    logger.emoji.error('Error updating product:', error);
     return { success: false, error };
   }
 };
@@ -182,7 +183,7 @@ export const deleteProduct = async (id: string) => {
     await deleteDoc(doc(db, productsCollection, id));
     return { success: true };
   } catch (error) {
-    console.error('Error deleting product:', error);
+    logger.error('Error deleting product:', error);
     return { success: false, error };
   }
 };
@@ -191,7 +192,7 @@ export const deleteProduct = async (id: string) => {
 
 export const addQuoteRequest = async (quote: Omit<QuoteRequest, 'id' | 'status' | 'createdAt'>) => {
   try {
-    console.log('🔄 Adding quote request to Firestore:', quote);
+    logger.emoji.loading('Adding quote request to Firestore:', quote);
     
     // Clean up data to prevent Firestore undefined value errors
     const cleanedQuote = Object.fromEntries(
@@ -204,17 +205,17 @@ export const addQuoteRequest = async (quote: Omit<QuoteRequest, 'id' | 'status' 
       createdAt: Timestamp.now(),
     });
     
-    console.log('✅ Quote request added successfully with ID:', docRef.id);
+    logger.emoji.success('Quote request added successfully with ID:', docRef.id);
     return { success: true, id: docRef.id };
   } catch (error) {
-    console.error('❌ Error adding quote request:', error);
+    logger.emoji.error('Error adding quote request:', error);
     return { success: false, error };
   }
 };
 
 export const getQuoteRequests = async () => {
   try {
-    console.log('🔄 Fetching quote requests from Firestore...');
+    logger.emoji.loading('Fetching quote requests from Firestore...');
     const q = query(collection(db, quotesCollection), orderBy('createdAt', 'desc'));
     const querySnapshot = await getDocs(q);
     const quotes: QuoteRequest[] = [];
@@ -227,10 +228,10 @@ export const getQuoteRequests = async () => {
       } as QuoteRequest);
     });
     
-    console.log('✅ Quote requests fetched successfully:', quotes.length);
+    logger.emoji.success('Quote requests fetched successfully:', quotes.length);
     return { success: true, quotes };
   } catch (error) {
-    console.error('❌ Error getting quote requests:', error);
+    logger.emoji.error('Error getting quote requests:', error);
     return { success: false, quotes: [], error };
   }
 };
@@ -238,7 +239,7 @@ export const getQuoteRequests = async () => {
 // Real-time listener for quote requests
 export const subscribeToQuoteRequests = (callback: (quotes: QuoteRequest[]) => void) => {
   try {
-    console.log('🔄 Setting up real-time quote requests listener...');
+    logger.emoji.loading('Setting up real-time quote requests listener...');
     const q = query(collection(db, quotesCollection), orderBy('createdAt', 'desc'));
     
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
@@ -251,41 +252,41 @@ export const subscribeToQuoteRequests = (callback: (quotes: QuoteRequest[]) => v
         } as QuoteRequest);
       });
       
-      console.log('✅ Real-time quote update received:', quotes.length, 'quotes');
+      logger.emoji.success('Real-time quote update received:', quotes.length, 'quotes');
       callback(quotes);
     }, (error) => {
-      console.error('❌ Error in quote requests real-time listener:', error);
+      logger.emoji.error('Error in quote requests real-time listener:', error);
     });
 
     return unsubscribe;
   } catch (error) {
-    console.error('❌ Error setting up quote requests listener:', error);
+    logger.emoji.error('Error setting up quote requests listener:', error);
     return () => {}; // Return empty function as fallback
   }
 };
 
 export const updateQuoteStatus = async (id: string, status: QuoteRequest['status']) => {
   try {
-    console.log('🔄 Updating quote status:', id, 'to', status);
+    logger.emoji.loading('Updating quote status:', id, 'to', status);
     const docRef = doc(db, quotesCollection, id);
     await updateDoc(docRef, { status });
-    console.log('✅ Quote status updated successfully');
+    logger.emoji.success('Quote status updated successfully');
     return { success: true };
   } catch (error) {
-    console.error('❌ Error updating quote status:', error);
+    logger.emoji.error('Error updating quote status:', error);
     return { success: false, error };
   }
 };
 
 export const deleteQuoteRequest = async (id: string) => {
   try {
-    console.log('🔄 Deleting quote request:', id);
+    logger.emoji.loading('Deleting quote request:', id);
     const docRef = doc(db, quotesCollection, id);
     await deleteDoc(docRef);
-    console.log('✅ Quote request deleted successfully');
+    logger.emoji.success('Quote request deleted successfully');
     return { success: true };
   } catch (error) {
-    console.error('❌ Error deleting quote request:', error);
+    logger.emoji.error('Error deleting quote request:', error);
     return { success: false, error };
   }
 };
@@ -294,12 +295,12 @@ export const deleteQuoteRequest = async (id: string) => {
 
 export const addBanner = async (banner: Omit<Banner, 'id' | 'createdAt' | 'updatedAt'>) => {
   try {
-    console.log('🔄 Adding new banner to Firestore:', banner);
+    logger.emoji.loading('Adding new banner to Firestore:', banner);
     
     // Check if we already have the maximum number of banners (8)
     const { success, banners } = await getBanners();
     if (success && banners.length >= 8) {
-      console.warn('⚠️ Maximum number of banners (8) reached');
+      logger.warn('Maximum number of banners (8) reached');
       return { 
         success: false, 
         error: 'Maximum number of banners (8) reached. Please delete a banner before adding a new one.' 
@@ -318,17 +319,17 @@ export const addBanner = async (banner: Omit<Banner, 'id' | 'createdAt' | 'updat
       createdAt: Timestamp.now(),
       updatedAt: Timestamp.now(),
     });
-    console.log('✅ Banner added successfully with ID:', docRef.id);
+    logger.emoji.success('Banner added successfully with ID:', docRef.id);
     return { success: true, id: docRef.id };
   } catch (error) {
-    console.error('❌ Error adding banner:', error);
+    logger.emoji.error('Error adding banner:', error);
     return { success: false, error };
   }
 };
 
 export const getBanners = async () => {
   try {
-    console.log('🔍 Fetching banners from Firestore...');
+    logger.log('Fetching banners from Firestore...');
     const q = query(collection(db, bannersCollection), orderBy('order', 'asc'));
     const querySnapshot = await getDocs(q);
     const banners: Banner[] = [];
@@ -342,10 +343,10 @@ export const getBanners = async () => {
       } as Banner);
     });
     
-    console.log(`✅ Successfully loaded ${banners.length} banners:`, banners);
+    logger.log(`Successfully loaded ${banners.length} banners:`, banners);
     return { success: true, banners };
   } catch (error) {
-    console.error('❌ Error getting banners:', error);
+    logger.error('Error getting banners:', error);
     return { success: false, banners: [], error };
   }
 };
@@ -359,7 +360,7 @@ export const updateBanner = async (id: string, updates: Partial<Banner>) => {
     });
     return { success: true };
   } catch (error) {
-    console.error('Error updating banner:', error);
+    logger.error('Error updating banner:', error);
     return { success: false, error };
   }
 };
@@ -369,23 +370,23 @@ export const deleteBanner = async (id: string) => {
     await deleteDoc(doc(db, bannersCollection, id));
     return { success: true };
   } catch (error) {
-    console.error('Error deleting banner:', error);
+    logger.error('Error deleting banner:', error);
     return { success: false, error };
   }
 };
 
 export const getActiveBanners = async () => {
   try {
-    console.log('🔍 Fetching active banners...');
+    logger.log('Fetching active banners...');
     const { success, banners } = await getBanners();
     if (success) {
       const activeBanners = banners.filter(banner => banner.isActive);
-      console.log(`✅ Found ${activeBanners.length} active banners out of ${banners.length} total`);
+      logger.log(`Found ${activeBanners.length} active banners out of ${banners.length} total`);
       return { success: true, banners: activeBanners };
     }
     return { success: false, banners: [] };
   } catch (error) {
-    console.error('❌ Error getting active banners:', error);
+    logger.error('Error getting active banners:', error);
     return { success: false, banners: [], error };
   }
 };
@@ -393,10 +394,10 @@ export const getActiveBanners = async () => {
 // Initialize default banners if none exist
 export const initializeDefaultBanners = async () => {
   try {
-    console.log('🔄 Checking if default banners need to be initialized...');
+    logger.log('Checking if default banners need to be initialized...');
     const { success, banners } = await getBanners();
     if (success && banners.length === 0) {
-      console.log('📦 No banners found, creating default banners...');
+      logger.log('No banners found, creating default banners...');
       // Add default banners with working URLs
       const defaultBanners = [
         {
@@ -429,13 +430,13 @@ export const initializeDefaultBanners = async () => {
         await addBanner(banner);
       }
       
-      console.log('✅ Default banners initialized successfully');
+      logger.success('Default banners initialized successfully');
       return { success: true, message: "Default banners initialized" };
     }
-    console.log('ℹ️ Banners already exist, skipping initialization');
+    logger.log('Banners already exist, skipping initialization');
     return { success: true, message: "Banners already exist" };
   } catch (error) {
-    console.error('❌ Error initializing default banners:', error);
+    logger.error('Error initializing default banners:', error);
     return { success: false, error };
   }
 };
@@ -445,7 +446,7 @@ export const initializeDefaultBanners = async () => {
 
 export const getCategories = async () => {
   try {
-    console.log('🔍 Fetching categories from Firestore...');
+    logger.log('Fetching categories from Firestore...');
     const q = query(collection(db, categoriesCollection), orderBy('displayOrder', 'asc'));
     const querySnapshot = await getDocs(q);
     const categories: Category[] = [];
@@ -459,33 +460,33 @@ export const getCategories = async () => {
       } as Category);
     });
     
-    console.log(`✅ Successfully loaded ${categories.length} categories:`, categories);
+    logger.log(`Successfully loaded ${categories.length} categories:`, categories);
     return { success: true, categories };
   } catch (error) {
-    console.error('❌ Error getting categories:', error);
+    logger.error('Error getting categories:', error);
     return { success: false, categories: [], error };
   }
 };
 
 export const addCategory = async (category: Omit<Category, 'id' | 'createdAt' | 'updatedAt'>) => {
   try {
-    console.log('🔄 Adding new category to Firestore:', category);
+    logger.emoji.loading('Adding new category to Firestore:', category);
     const docRef = await addDoc(collection(db, categoriesCollection), {
       ...category,
       createdAt: Timestamp.now(),
       updatedAt: Timestamp.now(),
     });
-    console.log('✅ Category added successfully with ID:', docRef.id);
+    logger.emoji.success('Category added successfully with ID:', docRef.id);
     return { success: true, id: docRef.id };
   } catch (error) {
-    console.error('❌ Error adding category:', error);
+    logger.emoji.error('Error adding category:', error);
     return { success: false, error };
   }
 };
 
 export const updateCategory = async (id: string, updates: Partial<Category>) => {
   try {
-    console.log('🔄 Updating category:', id, updates);
+    logger.emoji.loading('Updating category:', id, updates);
     
     // Clean the updates to remove undefined values
     const cleanUpdates = Object.fromEntries(
@@ -497,22 +498,22 @@ export const updateCategory = async (id: string, updates: Partial<Category>) => 
       ...cleanUpdates,
       updatedAt: Timestamp.now(),
     });
-    console.log('✅ Category updated successfully');
+    logger.emoji.success('Category updated successfully');
     return { success: true };
   } catch (error) {
-    console.error('❌ Error updating category:', error);
+    logger.emoji.error('Error updating category:', error);
     return { success: false, error };
   }
 };
 
 export const deleteCategory = async (id: string) => {
   try {
-    console.log('🔄 Deleting category:', id);
+    logger.emoji.loading('Deleting category:', id);
     await deleteDoc(doc(db, categoriesCollection, id));
-    console.log('✅ Category deleted successfully');
+    logger.emoji.success('Category deleted successfully');
     return { success: true };
   } catch (error) {
-    console.error('❌ Error deleting category:', error);
+    logger.emoji.error('Error deleting category:', error);
     return { success: false, error };
   }
 };
@@ -520,10 +521,10 @@ export const deleteCategory = async (id: string) => {
 // Initialize default categories if none exist
 export const initializeDefaultCategories = async () => {
   try {
-    console.log('🔄 Checking if default categories need to be initialized...');
+    logger.log('Checking if default categories need to be initialized...');
     const { success, categories } = await getCategories();
     if (success && categories.length === 0) {
-      console.log('📦 No categories found, creating default categories...');
+      logger.log('No categories found, creating default categories...');
       
       const defaultCategories = [
         { name: "IN-ROOM ACCESSORIES", description: "Accessories for hotel rooms and guest areas", displayOrder: 1 },
@@ -540,13 +541,13 @@ export const initializeDefaultCategories = async () => {
         await addCategory(category);
       }
       
-      console.log('✅ Default categories initialized successfully');
+      logger.success('Default categories initialized successfully');
       return { success: true, message: "Default categories initialized" };
     }
-    console.log('ℹ️ Categories already exist, skipping initialization');
+    logger.log('Categories already exist, skipping initialization');
     return { success: true, message: "Categories already exist" };
   } catch (error) {
-    console.error('❌ Error initializing default categories:', error);
+    logger.error('Error initializing default categories:', error);
     return { success: false, error };
   }
 };

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "@/lib/firebase";
+import { logger } from "@/lib/logger";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -85,13 +86,13 @@ const AdminBanners = () => {
   }, [navigate]);
 
   const loadBanners = async () => {
-    console.log('🔄 AdminBanners: Loading banners...');
+    logger.emoji.loading('AdminBanners: Loading banners...');
     const result = await getBanners();
     if (result.success) {
-      console.log('✅ AdminBanners: Banners loaded successfully:', result.banners);
+      logger.emoji.success('AdminBanners: Banners loaded successfully:', result.banners);
       setBanners(result.banners);
     } else {
-      console.error('❌ AdminBanners: Failed to load banners:', result.error);
+      logger.emoji.error('AdminBanners: Failed to load banners:', result.error);
       toast({
         title: "Error",
         description: "Failed to load banners. Check console for details.",
@@ -138,7 +139,7 @@ const AdminBanners = () => {
         description: errorMessage,
         variant: "destructive",
       });
-      console.error('Banner add error:', result.error);
+      logger.error('Banner add error:', result.error);
     }
   };
 

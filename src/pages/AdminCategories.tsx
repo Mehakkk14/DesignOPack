@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "@/lib/firebase";
+import { logger } from "@/lib/logger";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -71,13 +72,13 @@ const AdminCategories = () => {
   }, [navigate]);
 
   const loadCategories = async () => {
-    console.log('🔄 AdminCategories: Loading categories...');
+    logger.emoji.loading('AdminCategories: Loading categories...');
     const result = await getCategories();
     if (result.success) {
-      console.log('✅ AdminCategories: Categories loaded successfully:', result.categories);
+      logger.emoji.success('AdminCategories: Categories loaded successfully:', result.categories);
       setCategories(result.categories);
     } else {
-      console.error('❌ AdminCategories: Failed to load categories:', result.error);
+      logger.emoji.error('AdminCategories: Failed to load categories:', result.error);
       toast({
         title: "Error",
         description: "Failed to load categories. Check console for details.",

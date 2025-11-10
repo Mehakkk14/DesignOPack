@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "@/lib/firebase";
+import { logger } from "@/lib/logger";
 import { Plus, Search, Edit, Trash2, Package } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -74,17 +75,17 @@ const AdminProducts = () => {
   }, [navigate]);
 
   const loadProducts = async () => {
-    console.log('🔄 AdminProducts: Loading products...');
+    logger.emoji.loading('AdminProducts: Loading products...');
     try {
       const result = await getProducts();
       if (result.success) {
-        console.log('✅ AdminProducts: Products loaded successfully:', result.products);
+        logger.emoji.success('AdminProducts: Products loaded successfully:', result.products);
         setProducts(result.products);
       } else {
-        console.error('❌ AdminProducts: Failed to load products:', result.error);
+        logger.emoji.error('AdminProducts: Failed to load products:', result.error);
       }
     } catch (error) {
-      console.error('❌ AdminProducts: Error loading products:', error);
+      logger.emoji.error('AdminProducts: Error loading products:', error);
       toast({
         title: "Error",
         description: "Failed to load products",
@@ -94,17 +95,17 @@ const AdminProducts = () => {
   };
 
   const loadCategories = async () => {
-    console.log('🔄 AdminProducts: Loading categories...');
+    logger.emoji.loading('AdminProducts: Loading categories...');
     try {
       const result = await getCategories();
       if (result.success) {
-        console.log('✅ AdminProducts: Categories loaded successfully:', result.categories);
+        logger.emoji.success('AdminProducts: Categories loaded successfully:', result.categories);
         setCategories(result.categories);
       } else {
-        console.error('❌ AdminProducts: Failed to load categories:', result.error);
+        logger.emoji.error('AdminProducts: Failed to load categories:', result.error);
       }
     } catch (error) {
-      console.error('❌ AdminProducts: Error loading categories:', error);
+      logger.emoji.error('AdminProducts: Error loading categories:', error);
     }
   };
 
@@ -122,7 +123,7 @@ const AdminProducts = () => {
     }
     
     try {
-      console.log('🔄 AdminProducts: Submitting product data:', formData);
+      logger.emoji.loading('AdminProducts: Submitting product data:', formData);
       
       // Validate required fields
       if (!formData.name || !formData.description || !formData.imageUrl) {
@@ -142,20 +143,20 @@ const AdminProducts = () => {
         productData.price = formData.price;
       }
       
-      console.log('🔄 AdminProducts: Final product data:', productData);
+      logger.emoji.loading('AdminProducts: Final product data:', productData);
       if (editingProduct) {
-        console.log('🔄 AdminProducts: Updating existing product:', editingProduct.id);
+        logger.emoji.loading('AdminProducts: Updating existing product:', editingProduct.id);
         const result = await updateProduct(editingProduct.id, productData);
-        console.log('✅ AdminProducts: Product update result:', result);
+        logger.emoji.success('AdminProducts: Product update result:', result);
         toast({
           title: "Success",
           description: "Product updated successfully",
         });
         setNewlyAddedProductId(editingProduct.id);
       } else {
-        console.log('🔄 AdminProducts: Adding new product');
+        logger.emoji.loading('AdminProducts: Adding new product');
         const result = await addProduct(productData);
-        console.log('✅ AdminProducts: Product add result:', result);
+        logger.emoji.success('AdminProducts: Product add result:', result);
         if (!result.success) {
           throw new Error(result.error || 'Failed to add product');
         }
@@ -170,13 +171,13 @@ const AdminProducts = () => {
       }
       resetForm();
       setIsDialogOpen(false);
-      console.log('🔄 AdminProducts: Reloading products after save (keeping filters)...');
+      logger.emoji.loading('AdminProducts: Reloading products after save (keeping filters)...');
       // Reload products without resetting filters - products will appear in sorted position
       await loadProducts();
       // Clear the newly added indicator after animation completes (1s animation + 200ms buffer)
       setTimeout(() => setNewlyAddedProductId(null), 1200);
     } catch (error) {
-      console.error("Error saving product:", error);
+      logger.error("Error saving product:", error);
       toast({
         title: "Error",
         description: "Failed to save product",
@@ -207,7 +208,7 @@ const AdminProducts = () => {
         });
         loadProducts();
       } catch (error) {
-        console.error("Error deleting product:", error);
+        logger.error("Error deleting product:", error);
         toast({
           title: "Error",
           description: "Failed to delete product",
@@ -247,7 +248,7 @@ const AdminProducts = () => {
   });
 
   // Debug logging for filtered products
-  console.log('🔍 AdminProducts filter state:', {
+  logger.debug('AdminProducts filter state:', {
     filterCategory,
     searchQuery,
     totalProducts: products.length,
@@ -283,7 +284,7 @@ const AdminProducts = () => {
             <Button 
               variant="outline" 
               onClick={() => {
-                console.log('🔄 Manual refresh triggered');
+                logger.emoji.loading('Manual refresh triggered');
                 loadProducts();
               }}
             >
