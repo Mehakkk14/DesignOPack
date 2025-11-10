@@ -53,7 +53,7 @@ const QuoteModal = ({ isOpen, onClose, productName = "" }: QuoteModalProps) => {
 
       // Prepare email template parameters
       const templateParams = {
-        to_email: 'rastogimehak3845@gmail.com',
+        to_email: 'designopackindia@gmail.com',
         to_name: 'DesignOPack Team',
         from_name: quoteData.name,
         from_email: quoteData.email,
@@ -117,7 +117,7 @@ Please follow up with the customer within 24 hours.
 
     // Method 1: Try FormSubmit (reliable free service)
     try {
-      const formSubmitResponse = await fetch('https://formsubmit.co/rastogimehak3845@gmail.com', {
+      const formSubmitResponse = await fetch('https://formsubmit.co/designopackindia@gmail.com', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -142,7 +142,7 @@ Please follow up with the customer within 24 hours.
     }
 
     // Method 3: Create mailto link as ultimate fallback
-    const mailtoLink = `mailto:rastogimehak3845@gmail.com?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`;
+    const mailtoLink = `mailto:designopackindia@gmail.com?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`;
     
     try {
       window.open(mailtoLink, '_blank');
