@@ -51,25 +51,16 @@ const QuoteModal = ({ isOpen, onClose, productName = "" }: QuoteModalProps) => {
         return await sendEmailFallback(quoteData);
       }
 
-      // Prepare email template parameters
+      // Prepare email template parameters matching client's template variables
       const templateParams = {
-        to_email: 'designopackindia@gmail.com',
-        to_name: 'DesignOPack Team',
-        from_name: quoteData.name,
-        from_email: quoteData.email,
-        phone: quoteData.phone,
-        company_name: quoteData.companyName || 'Not provided',
-        product: quoteData.product || 'General Inquiry',
-        message: quoteData.message,
-        subject: `New Quote Request from ${quoteData.name}`,
-        submission_time: new Date().toLocaleString('en-US', {
-          timeZone: 'Asia/Kolkata',
-          year: 'numeric',
-          month: 'long',
-          day: 'numeric',
-          hour: '2-digit',
-          minute: '2-digit'
-        })
+        customer_name: quoteData.name,
+        customer_email: quoteData.email,
+        customer_phone: quoteData.phone,
+        customer_company: quoteData.companyName || 'Not provided',
+        product_name: quoteData.product || 'General Inquiry',
+        product_category: 'N/A',
+        quantity: 'To be discussed',
+        message: quoteData.message
       };
 
       logger.log('Sending email via EmailJS with params:', templateParams);
