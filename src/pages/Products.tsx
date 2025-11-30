@@ -39,13 +39,13 @@ const Products = () => {
       const result = await getProducts();
       if (result.success) {
         logger.emoji.loading('✅ Products page: Products loaded successfully:', result.products);
-        // Clean up products - remove price if it's 0 or null
-        const cleanedProducts = result.products.map(product => ({
+        // Ensure displayOrder is a number
+        const productsWithOrder = result.products.map(product => ({
           ...product,
-          price: product.price && product.price > 0 ? product.price : undefined
+          displayOrder: product.displayOrder !== undefined ? Number(product.displayOrder) : undefined
         }));
-        setProducts(cleanedProducts);
-        logger.emoji.loading('✅ Products page: Cleaned products set:', cleanedProducts);
+        setProducts(productsWithOrder);
+        logger.emoji.loading('✅ Products page: Products set with displayOrder:', productsWithOrder);
       } else {
         logger.emoji.error('❌ Products page: Failed to load products:', result.error);
       }
@@ -92,9 +92,34 @@ const Products = () => {
     }))
   ];
 
+  // Sort products by displayOrder (lower numbers first), then by name
+  const sortedProducts = [...products].sort((a, b) => {
+    console.log('🔍 Sorting:', a.name, 'displayOrder:', a.displayOrder, 'vs', b.name, 'displayOrder:', b.displayOrder);
+    // If both have displayOrder, sort by it
+    if (a.displayOrder !== undefined && b.displayOrder !== undefined) {
+      const result = a.displayOrder - b.displayOrder;
+      console.log('  → Both have displayOrder, result:', result);
+      return result;
+    }
+    // Products with displayOrder come first
+    if (a.displayOrder !== undefined) {
+      console.log('  → Only A has displayOrder, A comes first');
+      return -1;
+    }
+    if (b.displayOrder !== undefined) {
+      console.log('  → Only B has displayOrder, B comes first');
+      return 1;
+    }
+    // Otherwise sort by name
+    console.log('  → Neither has displayOrder, sorting by name');
+    return a.name.localeCompare(b.name);
+  });
+  
+  console.log('✅ Sorted products:', sortedProducts.map(p => ({ name: p.name, displayOrder: p.displayOrder })));
+
   const filteredProducts = selectedCategory === "all" 
-    ? products 
-    : products.filter(p => p.categories && p.categories.includes(selectedCategory));
+    ? sortedProducts 
+    : sortedProducts.filter(p => p.categories && p.categories.includes(selectedCategory));
 
   // Debug logging
   logger.emoji.loading('🔍 Products page state:', {

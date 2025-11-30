@@ -23,6 +23,7 @@ export interface Product {
   features?: string[];
   price?: number;
   inStock?: boolean;
+  displayOrder?: number;
   createdAt?: Date;
   updatedAt?: Date;
 }

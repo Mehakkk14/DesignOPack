@@ -57,6 +57,7 @@ const AdminProducts = () => {
     description: "",
     imageUrl: "",
     price: undefined as number | undefined,
+    displayOrder: undefined as number | undefined,
   });
 
   useEffect(() => {
@@ -143,6 +144,11 @@ const AdminProducts = () => {
         productData.price = formData.price;
       }
       
+      // Add display order if provided
+      if (formData.displayOrder !== undefined && formData.displayOrder !== null) {
+        productData.displayOrder = formData.displayOrder;
+      }
+      
       logger.emoji.loading('AdminProducts: Final product data:', productData);
       if (editingProduct) {
         logger.emoji.loading('AdminProducts: Updating existing product:', editingProduct.id);
@@ -194,6 +200,7 @@ const AdminProducts = () => {
       description: product.description,
       imageUrl: product.imageUrl,
       price: product.price && product.price > 0 ? product.price : undefined,
+      displayOrder: product.displayOrder,
     });
     setIsDialogOpen(true);
   };
@@ -366,6 +373,17 @@ const AdminProducts = () => {
                     onChange={(e) => setFormData({ ...formData, price: e.target.value ? Number(e.target.value) : undefined })}
                     placeholder="Leave empty if no price"
                   />
+                </div>
+                <div>
+                  <Label htmlFor="displayOrder">Display Order</Label>
+                  <Input
+                    id="displayOrder"
+                    type="number"
+                    value={formData.displayOrder || ""}
+                    onChange={(e) => setFormData({ ...formData, displayOrder: e.target.value ? Number(e.target.value) : undefined })}
+                    placeholder="Lower numbers appear first"
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">Lower numbers will be displayed first (e.g., 1, 2, 3...)</p>
                 </div>
                 <div className="col-span-2">
                   <ImageUpload
