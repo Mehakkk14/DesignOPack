@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { MapPin, Phone, Mail, Facebook, Instagram, Linkedin } from "lucide-react";
+import { MapPin, Phone, Mail, Facebook, Instagram } from "lucide-react";
 import logo from "@/assets/designopack-logo-white-new.png";
 
 const Footer = () => {
@@ -108,13 +108,6 @@ const Footer = () => {
               aria-label="Instagram"
             >
               <Instagram size={20} />
-            </a>
-            <a
-              href="#"
-              className="text-footer-text hover:text-maroon transition-colors"
-              aria-label="LinkedIn"
-            >
-              <Linkedin size={20} />
             </a>
           </div>
         </div>
