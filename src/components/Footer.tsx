@@ -92,14 +92,18 @@ const Footer = () => {
           </p>
           <div className="flex gap-4">
             <a
-              href="#"
+              href="https://www.facebook.com/share/16PFsxmaPH/"
+              target="_blank"
+              rel="noopener noreferrer"
               className="text-footer-text hover:text-maroon transition-colors"
               aria-label="Facebook"
             >
               <Facebook size={20} />
             </a>
             <a
-              href="#"
+              href="https://www.instagram.com/designopack.india?igsh=MWNscXhiMndvYnQ2cQ%3D%3D&utm_source=qr"
+              target="_blank"
+              rel="noopener noreferrer"
               className="text-footer-text hover:text-maroon transition-colors"
               aria-label="Instagram"
             >
