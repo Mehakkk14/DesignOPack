@@ -1,73 +1,124 @@
-# Welcome to your Lovable project
+# Designopack Luxury Showcase
 
-## Project info
+A premium luxury packaging showcase platform designed to display and manage high-end packaging products. This modern web application provides an elegant, interactive experience for customers to explore luxury packaging solutions while offering comprehensive admin controls for product and quote management.
 
-**URL**: https://lovable.dev/projects/b0ade18b-6066-4c2e-873d-14cfedd808eb
+## 🌟 Features
 
-## How can I edit this code?
+### Customer-Facing
+- **Product Showcase**: Beautiful, categorized display of luxury packaging products with high-quality images
+- **Interactive Quote System**: Request custom quotes with detailed product specifications via EmailJS integration
+- **Product Details Modal**: Comprehensive product information with image galleries
+- **WhatsApp Integration**: Direct customer support via WhatsApp button
+- **Responsive Design**: Seamless experience across all devices
+- **SEO Optimized**: Built with best practices for search engine visibility
 
-There are several ways of editing your application.
+### Admin Panel
+- **Product Management**: Full CRUD operations for products with drag-and-drop sorting
+- **Category Management**: Organize products into custom categories
+- **Banner Management**: Control homepage banners and promotional content
+- **Quote Management**: Review and manage customer quote requests
+- **Secure Authentication**: Protected admin routes with Firebase authentication
+- **Real-time Updates**: Instant synchronization with Firebase backend
 
-**Use Lovable**
+## 🛠️ Technology Stack
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/b0ade18b-6066-4c2e-873d-14cfedd808eb) and start prompting.
+- **Frontend Framework**: React 18 with TypeScript
+- **Build Tool**: Vite for fast development and optimized builds
+- **Styling**: Tailwind CSS for utility-first styling
+- **UI Components**: shadcn/ui for accessible, customizable components
+- **Backend**: Firebase (Firestore Database & Authentication)
+- **Email Service**: EmailJS for quote submission handling
+- **State Management**: React Hooks & Context API
+- **Routing**: React Router v6
 
-Changes made via Lovable will be committed automatically to this repo.
+## 📦 Installation
 
-**Use your preferred IDE**
+### Prerequisites
+- Node.js (v16 or higher)
+- npm or bun package manager
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+### Setup Instructions
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+1. **Clone the repository**
+```bash
+git clone <YOUR_REPO_URL>
+cd designopack-luxury-showcase-main
 ```
 
-**Edit a file directly in GitHub**
+2. **Install dependencies**
+```bash
+npm install
+# or
+bun install
+```
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+3. **Configure environment variables**
+Create necessary Firebase configuration in `src/lib/firebase.ts` with your Firebase project credentials.
 
-**Use GitHub Codespaces**
+4. **Start development server**
+```bash
+npm run dev
+# or
+bun dev
+```
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+5. **Build for production**
+```bash
+npm run build
+# or
+bun build
+```
 
-## What technologies are used for this project?
+## 🚀 Deployment
 
-This project is built with:
+This project is configured for deployment on Vercel with automatic CI/CD. Push to your main branch to trigger automatic deployments.
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+## 📁 Project Structure
 
-## How can I deploy this project?
+```
+designopack-luxury-showcase-main/
+├── src/
+│   ├── components/        # Reusable React components
+│   │   ├── admin/         # Admin panel components
+│   │   ├── products/      # Product-related components
+│   │   └── ui/            # shadcn/ui components
+│   ├── pages/             # Page components
+│   ├── lib/               # Utility functions & Firebase config
+│   ├── hooks/             # Custom React hooks
+│   └── assets/            # Static assets
+├── public/                # Public static files
+└── scripts/               # Utility scripts
+```
 
-Simply open [Lovable](https://lovable.dev/projects/b0ade18b-6066-4c2e-873d-14cfedd808eb) and click on Share -> Publish.
+## 🔐 Admin Access
 
-## Can I connect a custom domain to my Lovable project?
+Access the admin panel at `/admin/login`. Configure your admin credentials through Firebase Authentication.
 
-Yes, you can!
+## 📧 Email Configuration
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+Refer to `EMAILJS_SETUP.md` and `EMAILJS_QUOTE_SETUP.md` for detailed EmailJS integration instructions.
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+## 📚 Documentation
+
+- [Firebase Setup Guide](FIREBASE_SETUP.md)
+- [EmailJS Setup Guide](EMAILJS_SETUP.md)
+- [Quote System Documentation](QUOTE_SYSTEM_SUMMARY.md)
+- [SEO Setup Guide](SEO_SETUP_GUIDE.md)
+- [Testing Checklist](TESTING_CHECKLIST.md)
+- [Project Handover Document](PROJECT_HANDOVER.md)
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+## 📄 License
+
+This project is proprietary software. All rights reserved.
+
+## 📞 Support
+
+For support and inquiries, please use the contact form on the website or reach out via WhatsApp integration.
