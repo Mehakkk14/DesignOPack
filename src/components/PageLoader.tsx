@@ -5,10 +5,10 @@ const PageLoader = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Set a short loading time
+    // Set a longer loading time to allow images to load
     const timer = setTimeout(() => {
       setIsLoading(false);
-    }, 800); // Reduced to 800ms
+    }, 1500); // Set to 1500ms to give images time to load
 
     return () => clearTimeout(timer);
   }, []);
