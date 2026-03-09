@@ -173,13 +173,20 @@ const Home = () => {
           {bannerImages.map((image, index) => (
             <div
               key={index}
-              className="absolute inset-0 bg-cover bg-center transition-opacity duration-[1500ms] ease-in-out will-change-opacity"
+              className="absolute inset-0 transition-opacity duration-[1500ms] ease-in-out will-change-opacity"
               style={{
-                backgroundImage: `url(${image})`,
                 opacity: index === currentImageIndex ? 0.5 : 0,
                 zIndex: index === currentImageIndex ? 1 : 0,
               }}
-            />
+            >
+              <img
+                src={image}
+                alt={`Banner ${index + 1}`}
+                className="w-full h-full object-cover"
+                loading={index === 0 ? "eager" : "lazy"}
+                decoding="async"
+              />
+            </div>
           ))}
         </div>
         
