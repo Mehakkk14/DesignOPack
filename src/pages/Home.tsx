@@ -88,12 +88,8 @@ const Home = () => {
   };
   
   useEffect(() => {
-    // Start slider after 3 seconds
-    const startTimer = setTimeout(() => {
-      setIsSliderActive(true);
-    }, 3000);
-    
-    return () => clearTimeout(startTimer);
+    // Start slider immediately
+    setIsSliderActive(true);
   }, []);
   
   useEffect(() => {
@@ -171,7 +167,7 @@ const Home = () => {
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
-      <section className="relative h-[90vh] flex items-center justify-center overflow-hidden bg-gradient-to-br from-secondary via-black to-secondary">
+      <section className="relative h-[90vh] flex items-center justify-center overflow-hidden bg-gradient-to-br from-[#4a1f1f] via-[#2d1515] to-[#1a0a0a]">
         {/* Background Slider */}
         <div className="absolute inset-0">
           {bannerImages.map((image, index) => (
@@ -318,7 +314,7 @@ const Home = () => {
                       alt={client.name}
                       loading="lazy"
                       decoding="async"
-                      className="max-w-full max-h-full w-auto h-auto object-contain grayscale group-hover:grayscale-0 transition-all duration-300"
+                      className="max-w-full max-h-full w-auto h-auto object-contain transition-all duration-300"
                     />
                   </div>
                 </CarouselItem>
