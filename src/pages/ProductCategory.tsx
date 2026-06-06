@@ -85,7 +85,7 @@ const ProductCategory = () => {
           className="absolute inset-0 bg-cover bg-center opacity-20"
           role="presentation"
           style={{
-            backgroundImage: "url('https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1600&q=80')"
+            backgroundImage: "url('/ourproducts.webp')"
           }}
         />
         <div className="container mx-auto px-4 relative z-10 text-center">
