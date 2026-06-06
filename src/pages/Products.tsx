@@ -40,11 +40,11 @@ const Products = () => {
 
   // Icon mapping for categories
   const categoryIconMap: { [key: string]: any } = {
-    "Room Accessories": BedDouble,
-    "Bathroom Accessories": Bath,
+    "Room Amenities": BedDouble,
+    "Bathroom Amenities": Bath,
     "Gifting": Gift,
     "Food Packaging": Package,
-    "Restaurant and Bar Accessories ": UtensilsCrossed,
+    "Restaurant and Bar Amenities": UtensilsCrossed,
     "Desk Accessories": Monitor,
     "Nightstand Accessories": Lamp,
     "Mini Bar Tabletop Accessories": Coffee,
@@ -52,11 +52,11 @@ const Products = () => {
 
   // Category images mapping - Using actual product images from Home page
   const categoryImageMap: { [key: string]: string } = {
-    "Room Accessories": "https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=800&q=80",
-    "Bathroom Accessories": "/bathroom-equipment.webp",
+    "Room Amenities": "https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=800&q=80",
+    "Bathroom Amenities": "/bathroom-equipment.webp",
     "Gifting": "/gifting-solutions.webp",
     "Food Packaging": "/food-packaging.webp",
-    "Restaurant and Bar Accessories ": "/restaurant.webp",
+    "Restaurant and Bar Amenities": "/restaurant.webp",
     "Desk Accessories": "https://images.unsplash.com/photo-1593642632823-8f785ba67e45?w=800&q=80",
     "Nightstand Accessories": "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=800&q=80",
     "Mini Bar Tabletop Accessories": "https://images.unsplash.com/photo-1608270861620-7c80b239cc3d?w=800&q=80",
