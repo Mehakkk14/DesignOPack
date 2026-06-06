@@ -148,19 +148,6 @@ const ProductCategory = () => {
                         target.src = "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=600&q=80";
                       }}
                     />
-                    {/* Category Tags */}
-                    <div className="absolute top-3 right-3 flex flex-col gap-1">
-                      {(product.categories || []).slice(0, 2).map((category, idx) => (
-                        <span key={idx} className="bg-secondary/60 backdrop-blur-sm border border-white/20 text-white px-2 py-1 rounded-full text-xs font-body font-semibold">
-                          {category}
-                        </span>
-                      ))}
-                      {(product.categories || []).length > 2 && (
-                        <span className="bg-secondary/60 backdrop-blur-sm border border-white/20 text-white px-2 py-1 rounded-full text-xs font-body font-semibold">
-                          +{(product.categories || []).length - 2}
-                        </span>
-                      )}
-                    </div>
                     {/* Hover View Details Button */}
                     <div className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                       <Button 
