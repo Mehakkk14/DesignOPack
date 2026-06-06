@@ -504,7 +504,7 @@ const AdminProducts = () => {
                   <TableCell className="font-medium">{product.name}</TableCell>
                   <TableCell>
                     <div className="flex flex-wrap gap-1">
-                      {(product.categories || []).map((cat, index) => (
+                      {(product.categories || []).filter(cat => !cat.includes("Accessories")).map((cat, index) => (
                         <Badge key={index} variant="outline" className="text-xs">
                           {cat}
                         </Badge>
@@ -547,7 +547,7 @@ const AdminProducts = () => {
         <div className="bg-gradient-to-br from-orange-50 to-red-50 p-4 rounded-lg border border-orange-100">
           <p className="text-sm text-gray-600">Categories Used</p>
           <p className="text-2xl font-bold text-orange-600">
-            {new Set(products.flatMap((p) => p.categories || [])).size}
+            {new Set(products.flatMap((p) => (p.categories || []).filter(cat => !cat.includes("Accessories")))).size}
           </p>
         </div>
       </div>
