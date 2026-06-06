@@ -87,7 +87,7 @@ const ProductDetailsModal = ({
               </p>
               {productCategories.length > 0 && (
                 <div className="flex flex-wrap gap-2 pt-2">
-                  {productCategories.map((category, index) => (
+                  {productCategories.filter(cat => !cat.includes("Accessories")).map((category, index) => (
                     <span 
                       key={index}
                       className="bg-card border border-border px-3 py-1 rounded-full text-xs font-body"
