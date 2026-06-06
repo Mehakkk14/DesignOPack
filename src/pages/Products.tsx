@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { 
   BedDouble, 
   Monitor, 
@@ -11,49 +11,16 @@ import {
   Gift, 
   Package 
 } from "lucide-react";
-import ProductDetailsModal from "@/components/ProductDetailsModal";
-import { getProducts, getCategories, Product, Category } from "@/lib/firebaseService";
+import { getCategories, Category } from "@/lib/firebaseService";
 import { logger } from "@/lib/logger";
 
 const Products = () => {
-  const [selectedCategory, setSelectedCategory] = useState<string>("all");
-  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
-  const [selectedProduct, setSelectedProduct] = useState<{
-    name: string;
-    description: string;
-    categories: string[];
-    images: string[];
-  } | null>(null);
-  const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    loadProducts();
     loadCategories();
   }, []);
-
-  const loadProducts = async () => {
-    logger.emoji.loading('🔄 Products page: Loading products...');
-    try {
-      const result = await getProducts();
-      if (result.success) {
-        logger.emoji.loading('✅ Products page: Products loaded successfully:', result.products);
-        // Ensure displayOrder is a number
-        const productsWithOrder = result.products.map(product => ({
-          ...product,
-          displayOrder: product.displayOrder !== undefined ? Number(product.displayOrder) : undefined
-        }));
-        setProducts(productsWithOrder);
-        logger.emoji.loading('✅ Products page: Products set with displayOrder:', productsWithOrder);
-      } else {
-        logger.emoji.error('❌ Products page: Failed to load products:', result.error);
-      }
-    } catch (error) {
-      logger.emoji.error('❌ Products page: Error loading products:', error);
-    }
-    setLoading(false);
-  };
 
   const loadCategories = async () => {
     logger.emoji.loading('🔄 Products: Loading categories...');
@@ -68,75 +35,31 @@ const Products = () => {
     } catch (error) {
       logger.emoji.error('❌ Products: Error loading categories:', error);
     }
+    setLoading(false);
   };
 
   // Icon mapping for categories
   const categoryIconMap: { [key: string]: any } = {
-    "IN-ROOM ACCESSORIES": BedDouble,
-    "DESK ACCESSORIES": Monitor,
-    "NIGHTSTAND ACCESSORIES": Lamp,
-    "MINI BAR TABLETOP ACCESSORIES": Coffee,
-    "RESTAURANT & BAR ACCESSORIES": UtensilsCrossed,
-    "BATHROOM ACCESSORIES": Bath,
-    "GIFTING": Gift,
-    "FOOD PACKAGING": Package,
+    "Room Accessories": BedDouble,
+    "Bathroom Accessories": Bath,
+    "Gifting": Gift,
+    "Food Packaging": Package,
+    "Restaurant and Bar Accessories ": UtensilsCrossed,
+    "Desk Accessories": Monitor,
+    "Nightstand Accessories": Lamp,
+    "Mini Bar Tabletop Accessories": Coffee,
   };
 
-  // Transform categories for display
-  const displayCategories = [
-    { id: "all", name: "All Products", icon: null },
-    ...categories.map(cat => ({
-      id: cat.name,
-      name: cat.name,
-      icon: categoryIconMap[cat.name] || Package
-    }))
-  ];
-
-  // Sort products by displayOrder (lower numbers first), then by name
-  const sortedProducts = [...products].sort((a, b) => {
-    console.log('🔍 Sorting:', a.name, 'displayOrder:', a.displayOrder, 'vs', b.name, 'displayOrder:', b.displayOrder);
-    // If both have displayOrder, sort by it
-    if (a.displayOrder !== undefined && b.displayOrder !== undefined) {
-      const result = a.displayOrder - b.displayOrder;
-      console.log('  → Both have displayOrder, result:', result);
-      return result;
-    }
-    // Products with displayOrder come first
-    if (a.displayOrder !== undefined) {
-      console.log('  → Only A has displayOrder, A comes first');
-      return -1;
-    }
-    if (b.displayOrder !== undefined) {
-      console.log('  → Only B has displayOrder, B comes first');
-      return 1;
-    }
-    // Otherwise sort by name
-    console.log('  → Neither has displayOrder, sorting by name');
-    return a.name.localeCompare(b.name);
-  });
-  
-  console.log('✅ Sorted products:', sortedProducts.map(p => ({ name: p.name, displayOrder: p.displayOrder })));
-
-  const filteredProducts = selectedCategory === "all" 
-    ? sortedProducts 
-    : sortedProducts.filter(p => p.categories && p.categories.includes(selectedCategory));
-
-  // Debug logging
-  logger.emoji.loading('🔍 Products page state:', {
-    selectedCategory,
-    totalProducts: products.length,
-    filteredProducts: filteredProducts.length,
-    products: products.map(p => ({ id: p.id, name: p.name, categories: p.categories }))
-  });
-
-  const handleViewDetails = (product: Product) => {
-    setSelectedProduct({
-      name: product.name,
-      description: product.description,
-      categories: product.categories || [],
-      images: [product.imageUrl] // Use imageUrl from Product type
-    });
-    setIsDetailsModalOpen(true);
+  // Category images mapping - Using actual product images from Home page
+  const categoryImageMap: { [key: string]: string } = {
+    "Room Accessories": "https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=800&q=80",
+    "Bathroom Accessories": "/bathroom-equipment.webp",
+    "Gifting": "/gifting-solutions.webp",
+    "Food Packaging": "/food-packaging.webp",
+    "Restaurant and Bar Accessories ": "/restaurant.webp",
+    "Desk Accessories": "https://images.unsplash.com/photo-1593642632823-8f785ba67e45?w=800&q=80",
+    "Nightstand Accessories": "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=800&q=80",
+    "Mini Bar Tabletop Accessories": "https://images.unsplash.com/photo-1608270861620-7c80b239cc3d?w=800&q=80",
   };
 
   return (
@@ -155,136 +78,73 @@ const Products = () => {
             Our Products
           </h1>
           <p className="text-xl text-white/90 font-body max-w-2xl mx-auto animate-slide-up">
-            Premium hospitality and packaging solutions crafted with excellence
+            Explore our comprehensive range of premium hospitality and packaging solutions
           </p>
         </div>
       </section>
 
-      {/* Category Filter */}
-      <section className="py-8 bg-card border-b">
-        <div className="container mx-auto px-4">
-          <div className="flex flex-wrap justify-center gap-4 items-center">
-            {displayCategories.map((cat) => {
-              const Icon = cat.icon;
-              return (
-                <Button
-                  key={cat.id}
-                  variant={selectedCategory === cat.id ? "default" : "outline"}
-                  onClick={() => setSelectedCategory(cat.id)}
-                  className="flex items-center gap-2"
-                >
-                  {Icon && <Icon size={18} />}
-                  {cat.name}
-                </Button>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* Products Grid */}
-      <section className="py-16 px-4">
+      {/* Categories Grid */}
+      <section className="py-20 px-4">
         <div className="container mx-auto">
           {loading ? (
             <div className="text-center py-12">
-              <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-gray-900 mx-auto mb-4"></div>
-              <p className="text-gray-600 text-lg">Loading products...</p>
+              <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-primary mx-auto mb-4"></div>
+              <p className="text-foreground text-lg font-body">Loading categories...</p>
             </div>
-          ) : products.length === 0 ? (
+          ) : categories.length === 0 ? (
             <div className="text-center py-12">
-              <Package className="mx-auto mb-4 text-gray-400" size={48} />
-              <p className="text-gray-500 text-lg">No products available</p>
-              <p className="text-sm text-gray-400 mt-2">
-                Products will be added by the admin
+              <Package className="mx-auto mb-4 text-muted-foreground" size={48} />
+              <p className="text-foreground text-lg font-body">No categories available</p>
+              <p className="text-sm text-muted-foreground font-body mt-2">
+                Categories will be added by the admin
               </p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {filteredProducts.map((product, index) => (
-                <Card 
-                  key={product.id || index}
-                  className="group overflow-hidden hover-lift animate-scale-in relative"
-                  style={{ animationDelay: `${index * 50}ms` }}
-                >
-                  {/* use a taller image container (h-60) and remove extra padding per request */}
-                  <div className="relative h-60 overflow-hidden flex items-center justify-center bg-white">
-                    <img
-                      src={product.imageUrl}
-                      alt={product.name}
-                      loading="lazy"
-                      decoding="async"
-                      className="max-w-full max-h-full object-contain transition-transform duration-500 group-hover:scale-105"
-                      onError={(e) => {
-                        const target = e.target as HTMLImageElement;
-                        target.src = "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=600&q=80";
-                      }}
-                    />
-                    {/* Category Tags */}
-                    <div className="absolute top-3 right-3 flex flex-col gap-1">
-                      {(product.categories || []).slice(0, 2).map((category, index) => (
-                        <span key={index} className="bg-secondary/60 backdrop-blur-sm border border-white/20 text-white px-2 py-1 rounded-full text-xs font-body font-semibold">
-                          {category}
-                        </span>
-                      ))}
-                      {(product.categories || []).length > 2 && (
-                        <span className="bg-secondary/60 backdrop-blur-sm border border-white/20 text-white px-2 py-1 rounded-full text-xs font-body font-semibold">
-                          +{(product.categories || []).length - 2}
-                        </span>
-                      )}
-                    </div>
-                    {/* Hover View Details Button */}
-                    <div className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                      <Button 
-                        variant="secondary"
-                        size="sm"
-                        onClick={() => handleViewDetails(product)}
-                        className="text-sm"
-                      >
-                        View Details
-                      </Button>
-                    </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-12 max-w-3xl mx-auto">
+              {categories.map((category, index) => {
+                const Icon = categoryIconMap[category.name] || Package;
+                const imageUrl = categoryImageMap[category.name] || "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=800&q=80";
+                const isLastOdd = index === categories.length - 1 && categories.length % 2 === 1;
+                
+                return (
+                  <div key={category.id} className={isLastOdd ? "col-start-1 col-end-2 md:col-start-1 md:col-end-3 md:w-1/2 mx-auto" : ""}>
+                    <Link 
+                      to={`/products/${encodeURIComponent(category.name)}`}
+                      className="group animate-scale-in w-full block"
+                      style={{ animationDelay: `${index * 150}ms` }}
+                    >
+                    <Card className="h-full overflow-hidden hover-lift border-2 hover:border-primary transition-all duration-300">
+                      <div className="relative h-56 overflow-hidden">
+                        <img
+                          src={imageUrl}
+                          alt={category.name}
+                          loading="lazy"
+                          decoding="async"
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.src = "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=800&q=80";
+                          }}
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
+                        <div className="absolute bottom-4 left-4 right-4">
+                          <Icon className="text-primary mb-2" size={32} />
+                        </div>
+                      </div>
+                      <CardContent className="p-3">
+                        <h3 className="font-heading font-semibold text-base group-hover:text-primary transition-colors text-foreground line-clamp-2">
+                          {category.name}
+                        </h3>
+                      </CardContent>
+                    </Card>
+                    </Link>
                   </div>
-                  <CardContent className="p-3">
-                    <h3 className="font-heading font-semibold text-lg text-foreground">
-                      {product.name}
-                    </h3>
-                    {product.price && product.price > 0 ? (
-                      <p className="text-primary font-semibold mt-1">
-                        ₹{product.price}
-                      </p>
-                    ) : null}
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
-
-          {filteredProducts.length === 0 && products.length > 0 && (
-            <div className="text-center py-12">
-              <Package className="mx-auto mb-4 text-gray-400" size={48} />
-              <p className="text-gray-500 text-lg">No products found in this category</p>
-              <p className="text-sm text-gray-400 mt-2">
-                Try selecting a different category
-              </p>
+                );
+              })}
             </div>
           )}
         </div>
       </section>
-
-      {/* Product Details Modal */}
-      {selectedProduct && (
-        <ProductDetailsModal 
-          isOpen={isDetailsModalOpen}
-          onClose={() => {
-            setIsDetailsModalOpen(false);
-            setSelectedProduct(null);
-          }}
-          productName={selectedProduct.name}
-          productDescription={selectedProduct.description}
-          productCategories={selectedProduct.categories}
-          productImages={selectedProduct.images}
-        />
-      )}
     </div>
   );
 };
