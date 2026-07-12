@@ -44,32 +44,57 @@ const Products = () => {
     setLoading(false);
   };
 
+  const normalizeCategoryName = (name: string) => name.trim().toUpperCase();
+
+  const categoryDisplayNameMap: { [key: string]: string } = {
+    "IN-ROOM ACCESSORIES": "In-Room Accessories",
+    "ROOM AMENITIES": "In-Room Accessories",
+    "BATHROOM ACCESSORIES": "Bathroom Amenities",
+    "BATHROOM AMENITIES": "Bathroom Amenities",
+    GIFTING: "Gifting Solutions",
+    "FOOD PACKAGING": "Food Packaging",
+    "RESTAURANT & BAR ACCESSORIES": "Restaurant and Bar Menu",
+    "RESTAURANT AND BAR AMENITIES": "Restaurant and Bar Menu",
+    "RESTAURANT AND BAR MENU": "Restaurant and Bar Menu",
+    "DESK ACCESSORIES": "Desk Accessories",
+    "NIGHTSTAND ACCESSORIES": "Nightstand Accessories",
+    "MINI BAR TABLETOP ACCESSORIES": "Mini Bar Tabletop Accessories",
+  };
+
   // Icon mapping for categories
   const categoryIconMap: { [key: string]: any } = {
-    "Room Amenities": BedDouble,
-    "Bathroom Amenities": Bath,
-    Gifting: Gift,
-    "Food Packaging": Package,
-    "Restaurant and Bar Amenities": UtensilsCrossed,
-    "Desk Accessories": Monitor,
-    "Nightstand Accessories": Lamp,
-    "Mini Bar Tabletop Accessories": Coffee,
+    "IN-ROOM ACCESSORIES": BedDouble,
+    "ROOM AMENITIES": BedDouble,
+    "BATHROOM ACCESSORIES": Bath,
+    "BATHROOM AMENITIES": Bath,
+    GIFTING: Gift,
+    "FOOD PACKAGING": Package,
+    "RESTAURANT & BAR ACCESSORIES": UtensilsCrossed,
+    "RESTAURANT AND BAR AMENITIES": UtensilsCrossed,
+    "RESTAURANT AND BAR MENU": UtensilsCrossed,
+    "DESK ACCESSORIES": Monitor,
+    "NIGHTSTAND ACCESSORIES": Lamp,
+    "MINI BAR TABLETOP ACCESSORIES": Coffee,
   };
 
   // Category images mapping - Using actual product images from Home page
   const categoryImageMap: { [key: string]: string } = {
-    "Room Amenities":
+    "IN-ROOM ACCESSORIES":
       "https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=800&q=80",
-    "Bathroom Amenities": "/bathroom-equipment.webp",
-    Gifting: "/gifting-solutions.webp",
-    "Food Packaging": "/food-packaging.webp",
-    "Restaurant and Bar Amenities": "/restaurant.webp",
-    "Restaurant and Bar Menu": "/restaurant.webp",
-    "Desk Accessories":
+    "ROOM AMENITIES":
+      "https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=800&q=80",
+    "BATHROOM ACCESSORIES": "/bathroom-equipment.webp",
+    "BATHROOM AMENITIES": "/bathroom-equipment.webp",
+    GIFTING: "/gifting-solutions.webp",
+    "FOOD PACKAGING": "/food-packaging.webp",
+    "RESTAURANT & BAR ACCESSORIES": "/restaurant.webp",
+    "RESTAURANT AND BAR AMENITIES": "/restaurant.webp",
+    "RESTAURANT AND BAR MENU": "/restaurant.webp",
+    "DESK ACCESSORIES":
       "https://images.unsplash.com/photo-1593642632823-8f785ba67e45?w=800&q=80",
-    "Nightstand Accessories":
+    "NIGHTSTAND ACCESSORIES":
       "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=800&q=80",
-    "Mini Bar Tabletop Accessories":
+    "MINI BAR TABLETOP ACCESSORIES":
       "https://images.unsplash.com/photo-1608270861620-7c80b239cc3d?w=800&q=80",
   };
 
@@ -121,9 +146,12 @@ const Products = () => {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-12 max-w-3xl mx-auto">
               {categories.map((category, index) => {
-                const Icon = categoryIconMap[category.name] || Package;
+                const normalizedName = normalizeCategoryName(category.name);
+                const displayName =
+                  categoryDisplayNameMap[normalizedName] || category.name;
+                const Icon = categoryIconMap[normalizedName] || Package;
                 const imageUrl =
-                  categoryImageMap[category.name] ||
+                  categoryImageMap[normalizedName] ||
                   "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=800&q=80";
                 const isLastOdd =
                   index === categories.length - 1 &&
@@ -164,7 +192,7 @@ const Products = () => {
                         </div>
                         <CardContent className="p-3">
                           <h3 className="font-heading font-semibold text-base group-hover:text-primary transition-colors text-foreground line-clamp-2">
-                            {category.name}
+                            {displayName}
                           </h3>
                         </CardContent>
                       </Card>

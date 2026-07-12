@@ -1,13 +1,14 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { 
-  BedDouble, 
-  Bath, 
-  Gift, 
+import {
+  BedDouble,
+  Bath,
+  Gift,
   ShoppingBag,
+  UtensilsCrossed,
   Award,
-  CheckCircle
+  CheckCircle,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import banner1 from "@/assets/banner1.webp";
@@ -57,13 +58,13 @@ const Home = () => {
   const [isSliderActive, setIsSliderActive] = useState(false);
   const [banners, setBanners] = useState<Banner[]>([]);
   const [bannerImages, setBannerImages] = useState<string[]>([]);
-  
+
   // Fallback to static banners if no Firebase banners are available
   const staticBanners = [banner1, banner2, banner3, banner4];
-  
+
   useEffect(() => {
     loadBanners();
-    
+
     // Initialize default banners if needed
     import("@/lib/firebaseService").then(({ initializeDefaultBanners }) => {
       initializeDefaultBanners().then(() => {
@@ -74,58 +75,79 @@ const Home = () => {
   }, []);
 
   const loadBanners = async () => {
-    logger.emoji.loading('🔄 Home: Loading active banners...');
+    logger.emoji.loading("🔄 Home: Loading active banners...");
     const result = await getActiveBanners();
     if (result.success && result.banners.length > 0) {
-      logger.emoji.loading('✅ Home: Active banners loaded:', result.banners);
+      logger.emoji.loading("✅ Home: Active banners loaded:", result.banners);
       setBanners(result.banners);
-      setBannerImages(result.banners.map(banner => banner.imageUrl));
+      setBannerImages(result.banners.map((banner) => banner.imageUrl));
     } else {
-      logger.emoji.loading('⚠️ Home: No active banners found, using static fallback');
+      logger.emoji.loading(
+        "⚠️ Home: No active banners found, using static fallback",
+      );
       // Use static banners as fallback
       setBannerImages(staticBanners);
     }
   };
-  
+
   useEffect(() => {
     // Start slider immediately
     setIsSliderActive(true);
   }, []);
-  
+
   useEffect(() => {
     if (!isSliderActive || bannerImages.length === 0) return;
-    
+
     // Change image every 3 seconds (as requested)
     const interval = setInterval(() => {
-      setCurrentImageIndex((prevIndex) => (prevIndex + 1) % bannerImages.length);
+      setCurrentImageIndex(
+        (prevIndex) => (prevIndex + 1) % bannerImages.length,
+      );
     }, 3000);
-    
+
     return () => clearInterval(interval);
   }, [isSliderActive, bannerImages.length]);
   const categories = [
     {
+      icon: UtensilsCrossed,
+      title: "Restaurant and Bar Menu",
+      description:
+        "Elegant menu presentation and tabletop solutions for dining spaces",
+      routeCategory: "Restaurant and Bar Menu",
+      image: "/restaurant.webp",
+    },
+    {
       icon: BedDouble,
       title: "In-Room Accessories",
-      description: "Premium menu folders, trays, tissue boxes, and more in elegant Leatherette",
-      image: "https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=800&q=80",
+      description:
+        "Premium menu folders, trays, tissue boxes, and more in elegant Leatherette",
+      routeCategory: "Room Amenities",
+      image:
+        "https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=800&q=80",
     },
     {
       icon: Bath,
-      title: "Bathroom Equipments",
-      description: "Luxury amenities and accessories in Resin and Leatherette finishes",
+      title: "Bathroom Amenities",
+      description:
+        "Luxury amenities and accessories in Resin and Leatherette finishes",
+      routeCategory: "Bathroom Amenities",
       image: "/bathroom-equipment.webp",
-    },
-    {
-      icon: Gift,
-      title: "Gifting Solutions",
-      description: "Customized hampers, photo frames, greeting cards, and corporate gifts",
-      image: "/gifting-solutions.webp",
     },
     {
       icon: ShoppingBag,
       title: "Food Packaging",
-      description: "Premium boxes and carry bags in SBS, Kraft, and Kappa Board",
+      description:
+        "Premium boxes and carry bags in SBS, Kraft, and Kappa Board",
+      routeCategory: "Food Packaging",
       image: "/food-packaging.webp",
+    },
+    {
+      icon: Gift,
+      title: "Gifting Solutions",
+      description:
+        "Customized hampers, photo frames, greeting cards, and corporate gifts",
+      routeCategory: "Gifting",
+      image: "/gifting-solutions.webp",
     },
   ];
 
@@ -161,7 +183,7 @@ const Home = () => {
     "15+ Years of Excellence",
     "Premium Quality Materials",
     "Customization Available",
-    "Trusted by 100+ Hotels"
+    "Trusted by 100+ Hotels",
   ];
 
   return (
@@ -189,7 +211,7 @@ const Home = () => {
             </div>
           ))}
         </div>
-        
+
         {/* Dark overlay for better text readability */}
         <div className="absolute inset-0 bg-black/20 z-[2]" />
         <div className="container mx-auto px-4 relative z-[3] text-center">
@@ -217,7 +239,7 @@ const Home = () => {
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             {features.map((feature, index) => (
-              <div 
+              <div
                 key={index}
                 className="flex items-center justify-center gap-3 animate-fade-in"
                 style={{ animationDelay: `${index * 100}ms` }}
@@ -240,22 +262,23 @@ const Home = () => {
               Our Product Categories
             </h2>
             <p className="text-muted-foreground font-body text-lg max-w-2xl mx-auto">
-              Discover our comprehensive range of premium hospitality and packaging solutions
+              Discover our comprehensive range of premium hospitality and
+              packaging solutions
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 xl:gap-5">
             {categories.map((category, index) => {
               const Icon = category.icon;
               return (
-                <Link 
-                  key={index} 
-                  to="/products"
+                <Link
+                  key={index}
+                  to={`/products/${encodeURIComponent(category.routeCategory)}`}
                   className="group animate-scale-in"
                   style={{ animationDelay: `${index * 150}ms` }}
                 >
                   <Card className="h-full overflow-hidden hover-lift border-2 hover:border-primary transition-all duration-300">
-                    <div className="relative h-48 overflow-hidden">
+                    <div className="relative h-36 overflow-hidden">
                       <img
                         src={category.image}
                         alt={category.title}
@@ -264,15 +287,15 @@ const Home = () => {
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
-                      <div className="absolute bottom-4 left-4 right-4">
-                        <Icon className="text-primary mb-2" size={32} />
+                      <div className="absolute bottom-3 left-3 right-3">
+                        <Icon className="text-primary mb-2" size={28} />
                       </div>
                     </div>
-                    <CardContent className="p-6">
-                      <h3 className="font-heading font-semibold text-xl mb-2 group-hover:text-primary transition-colors">
+                    <CardContent className="p-4">
+                      <h3 className="font-heading font-semibold text-base xl:text-lg mb-2 group-hover:text-primary transition-colors leading-snug">
                         {category.title}
                       </h3>
-                      <p className="text-muted-foreground font-body text-sm leading-relaxed">
+                      <p className="text-muted-foreground font-body text-xs xl:text-sm leading-relaxed line-clamp-3">
                         {category.description}
                       </p>
                     </CardContent>
@@ -296,7 +319,7 @@ const Home = () => {
               Proud partners of premium hospitality brands
             </p>
           </div>
-          
+
           <Carousel
             opts={{
               align: "start",
@@ -311,8 +334,8 @@ const Home = () => {
           >
             <CarouselContent className="-ml-4">
               {clientLogos.map((client, index) => (
-                <CarouselItem 
-                  key={index} 
+                <CarouselItem
+                  key={index}
                   className="pl-4 basis-1/2 md:basis-1/4"
                 >
                   <div className="group p-6 bg-white/5 backdrop-blur-sm rounded-lg border border-border hover:border-primary/50 transition-all duration-300 hover:shadow-lg hover:shadow-primary/10 hover:scale-105 h-32 flex items-center justify-center">
@@ -334,7 +357,7 @@ const Home = () => {
       {/* CTA Section */}
       <section className="relative py-20 px-4 text-white overflow-hidden">
         {/* Background Image */}
-        <div 
+        <div
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
           style={{
             backgroundImage: `url(${ctaBackground})`,
@@ -342,15 +365,20 @@ const Home = () => {
         />
         {/* Dark overlay for better text readability */}
         <div className="absolute inset-0 bg-black/60" />
-        
+
         <div className="container mx-auto text-center relative z-10">
           <h2 className="text-3xl md:text-5xl font-heading font-bold mb-6 text-white">
             Ready to Elevate Your Brand?
           </h2>
           <p className="text-lg text-gray-200 font-body mb-8 max-w-2xl mx-auto">
-            Let's create premium packaging solutions that perfectly represent your luxury brand
+            Let's create premium packaging solutions that perfectly represent
+            your luxury brand
           </p>
-          <Button size="lg" asChild className="text-lg bg-maroon hover:bg-red-900 text-white border-none">
+          <Button
+            size="lg"
+            asChild
+            className="text-lg bg-maroon hover:bg-red-900 text-white border-none"
+          >
             <Link to="/contact">Get in Touch</Link>
           </Button>
         </div>

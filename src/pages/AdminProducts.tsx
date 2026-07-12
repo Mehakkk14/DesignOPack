@@ -33,7 +33,15 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { getProducts, addProduct, updateProduct, deleteProduct, getCategories, Product, Category } from "@/lib/firebaseService";
+import {
+  getProducts,
+  addProduct,
+  updateProduct,
+  deleteProduct,
+  getCategories,
+  Product,
+  Category,
+} from "@/lib/firebaseService";
 import { useToast } from "@/hooks/use-toast";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { ImageUpload } from "@/components/ui/image-upload";
@@ -47,7 +55,9 @@ const AdminProducts = () => {
   const [filterCategory, setFilterCategory] = useState("all");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
-  const [newlyAddedProductId, setNewlyAddedProductId] = useState<string | null>(null);
+  const [newlyAddedProductId, setNewlyAddedProductId] = useState<string | null>(
+    null,
+  );
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -75,18 +85,70 @@ const AdminProducts = () => {
     return () => unsubscribe();
   }, [navigate]);
 
+  const legacyCategoryNameMap: Record<string, string> = {
+    "Restaurant and Bar Amenities": "Restaurant and Bar Menu",
+    "Bathroom Equipments": "Bathroom Amenities",
+  };
+
+  const normalizeCategories = (categories: string[]) => {
+    const normalized = categories
+      .map((category) => legacyCategoryNameMap[category] || category)
+      .filter((category, index, list) => list.indexOf(category) === index);
+
+    return normalized;
+  };
+
   const loadProducts = async () => {
-    logger.emoji.loading('AdminProducts: Loading products...');
+    logger.emoji.loading("AdminProducts: Loading products...");
     try {
       const result = await getProducts();
       if (result.success) {
-        logger.emoji.success('AdminProducts: Products loaded successfully:', result.products);
-        setProducts(result.products);
+        const normalizedProducts = result.products.map((product) => {
+          const originalCategories = product.categories || [];
+          const normalizedCategories = normalizeCategories(originalCategories);
+          return {
+            ...product,
+            originalCategories,
+            categories: normalizedCategories,
+          };
+        });
+
+        logger.emoji.success(
+          "AdminProducts: Products loaded successfully:",
+          normalizedProducts,
+        );
+        setProducts(normalizedProducts);
+
+        const productsNeedingCleanup = normalizedProducts.filter((product) => {
+          const originalCategories = product.originalCategories || [];
+          const cleanedCategories = product.categories || [];
+          return (
+            cleanedCategories.length !== originalCategories.length ||
+            cleanedCategories.some(
+              (category, index) => category !== originalCategories[index],
+            )
+          );
+        });
+
+        if (productsNeedingCleanup.length > 0) {
+          await Promise.all(
+            productsNeedingCleanup.map((product) =>
+              updateProduct(product.id!, { categories: product.categories }),
+            ),
+          );
+          logger.emoji.success(
+            "AdminProducts: Cleaned legacy category tags:",
+            productsNeedingCleanup.length,
+          );
+        }
       } else {
-        logger.emoji.error('AdminProducts: Failed to load products:', result.error);
+        logger.emoji.error(
+          "AdminProducts: Failed to load products:",
+          result.error,
+        );
       }
     } catch (error) {
-      logger.emoji.error('AdminProducts: Error loading products:', error);
+      logger.emoji.error("AdminProducts: Error loading products:", error);
       toast({
         title: "Error",
         description: "Failed to load products",
@@ -96,23 +158,29 @@ const AdminProducts = () => {
   };
 
   const loadCategories = async () => {
-    logger.emoji.loading('AdminProducts: Loading categories...');
+    logger.emoji.loading("AdminProducts: Loading categories...");
     try {
       const result = await getCategories();
       if (result.success) {
-        logger.emoji.success('AdminProducts: Categories loaded successfully:', result.categories);
+        logger.emoji.success(
+          "AdminProducts: Categories loaded successfully:",
+          result.categories,
+        );
         setCategories(result.categories);
       } else {
-        logger.emoji.error('AdminProducts: Failed to load categories:', result.error);
+        logger.emoji.error(
+          "AdminProducts: Failed to load categories:",
+          result.error,
+        );
       }
     } catch (error) {
-      logger.emoji.error('AdminProducts: Error loading categories:', error);
+      logger.emoji.error("AdminProducts: Error loading categories:", error);
     }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Validate that at least one category is selected
     if (formData.categories.length === 0) {
       toast({
@@ -122,49 +190,57 @@ const AdminProducts = () => {
       });
       return;
     }
-    
+
     try {
-      logger.emoji.loading('AdminProducts: Submitting product data:', formData);
-      
+      logger.emoji.loading("AdminProducts: Submitting product data:", formData);
+
       // Validate required fields
       if (!formData.name || !formData.description || !formData.imageUrl) {
-        throw new Error('Missing required fields');
+        throw new Error("Missing required fields");
       }
-      
-      const productData: any = { 
+
+      const cleanedCategories = normalizeCategories(formData.categories);
+
+      const productData: any = {
         name: formData.name,
-        categories: formData.categories,
+        categories: cleanedCategories,
         description: formData.description,
         imageUrl: formData.imageUrl,
-        inStock: true
+        inStock: true,
       };
-      
+
       // Only add price if it exists and is greater than 0
       if (formData.price && formData.price > 0) {
         productData.price = formData.price;
       }
-      
+
       // Add display order if provided
-      if (formData.displayOrder !== undefined && formData.displayOrder !== null) {
+      if (
+        formData.displayOrder !== undefined &&
+        formData.displayOrder !== null
+      ) {
         productData.displayOrder = formData.displayOrder;
       }
-      
-      logger.emoji.loading('AdminProducts: Final product data:', productData);
+
+      logger.emoji.loading("AdminProducts: Final product data:", productData);
       if (editingProduct) {
-        logger.emoji.loading('AdminProducts: Updating existing product:', editingProduct.id);
+        logger.emoji.loading(
+          "AdminProducts: Updating existing product:",
+          editingProduct.id,
+        );
         const result = await updateProduct(editingProduct.id, productData);
-        logger.emoji.success('AdminProducts: Product update result:', result);
+        logger.emoji.success("AdminProducts: Product update result:", result);
         toast({
           title: "Success",
           description: "Product updated successfully",
         });
         setNewlyAddedProductId(editingProduct.id);
       } else {
-        logger.emoji.loading('AdminProducts: Adding new product');
+        logger.emoji.loading("AdminProducts: Adding new product");
         const result = await addProduct(productData);
-        logger.emoji.success('AdminProducts: Product add result:', result);
+        logger.emoji.success("AdminProducts: Product add result:", result);
         if (!result.success) {
-          throw new Error(result.error || 'Failed to add product');
+          throw new Error(result.error || "Failed to add product");
         }
         // Track the newly added product ID for animation
         if (result.id) {
@@ -177,7 +253,9 @@ const AdminProducts = () => {
       }
       resetForm();
       setIsDialogOpen(false);
-      logger.emoji.loading('AdminProducts: Reloading products after save (keeping filters)...');
+      logger.emoji.loading(
+        "AdminProducts: Reloading products after save (keeping filters)...",
+      );
       // Reload products without resetting filters - products will appear in sorted position
       await loadProducts();
       // Clear the newly added indicator after animation completes (1s animation + 200ms buffer)
@@ -239,28 +317,35 @@ const AdminProducts = () => {
   const handleAddProductClick = () => {
     // When opening dialog for new product, auto-assign filtered category
     if (filterCategory !== "all") {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
-        categories: [filterCategory]
+        categories: normalizeCategories([filterCategory]),
       }));
     }
     setIsDialogOpen(true);
   };
 
   const filteredProducts = products.filter((product) => {
-    const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    const matchesSearch =
+      product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       product.description.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = filterCategory === "all" || (product.categories && product.categories.includes(filterCategory));
+    const matchesCategory =
+      filterCategory === "all" ||
+      (product.categories && product.categories.includes(filterCategory));
     return matchesSearch && matchesCategory;
   });
 
   // Debug logging for filtered products
-  logger.debug('AdminProducts filter state:', {
+  logger.debug("AdminProducts filter state:", {
     filterCategory,
     searchQuery,
     totalProducts: products.length,
     filteredProducts: filteredProducts.length,
-    products: products.map(p => ({ id: p.id, name: p.name, categories: p.categories }))
+    products: products.map((p) => ({
+      id: p.id,
+      name: p.name,
+      categories: p.categories,
+    })),
   });
 
   if (loading) {
@@ -288,21 +373,24 @@ const AdminProducts = () => {
             <p className="text-gray-500 mt-1">Manage your product catalog</p>
           </div>
           <div className="flex gap-2">
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               onClick={() => {
-                logger.emoji.loading('Manual refresh triggered');
+                logger.emoji.loading("Manual refresh triggered");
                 loadProducts();
               }}
             >
               Refresh
             </Button>
-            <Dialog open={isDialogOpen} onOpenChange={(open) => {
-              setIsDialogOpen(open);
-              if (!open) resetForm();
-            }}>
+            <Dialog
+              open={isDialogOpen}
+              onOpenChange={(open) => {
+                setIsDialogOpen(open);
+                if (!open) resetForm();
+              }}
+            >
               <DialogTrigger asChild>
-                <Button 
+                <Button
                   className="bg-gradient-to-r from-gray-900 to-gray-700 hover:from-gray-800 hover:to-gray-600"
                   onClick={handleAddProductClick}
                 >
@@ -311,247 +399,314 @@ const AdminProducts = () => {
                 </Button>
               </DialogTrigger>
               <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>{editingProduct ? "Edit Product" : "Add New Product"}</DialogTitle>
-              <DialogDescription>
-                {editingProduct ? "Update product information" : "Add a new product to your catalog"}
-              </DialogDescription>
-            </DialogHeader>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="col-span-2">
-                  <Label htmlFor="name">Product Name *</Label>
-                  <Input
-                    id="name"
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    placeholder="Enter product name"
-                    required
-                  />
-                </div>
-                <div className="col-span-2">
-                  <Label htmlFor="categories">Categories *</Label>
-                  <div className="grid grid-cols-2 gap-3 p-4 border rounded-md bg-gray-50">
-                    {categories.map((cat) => (
-                      <div key={cat.id} className="flex items-center space-x-2">
-                        <Checkbox
-                          id={cat.id}
-                          checked={formData.categories.includes(cat.name)}
-                          onCheckedChange={(checked) => {
-                            if (checked) {
-                              setFormData({
-                                ...formData,
-                                categories: [...formData.categories, cat.name]
-                              });
-                            } else {
-                              setFormData({
-                                ...formData,
-                                categories: formData.categories.filter(c => c !== cat.name)
-                              });
-                            }
-                          }}
-                        />
-                        <Label 
-                          htmlFor={cat.id} 
-                          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
-                        >
-                          {cat.name}
-                        </Label>
+                <DialogHeader>
+                  <DialogTitle>
+                    {editingProduct ? "Edit Product" : "Add New Product"}
+                  </DialogTitle>
+                  <DialogDescription>
+                    {editingProduct
+                      ? "Update product information"
+                      : "Add a new product to your catalog"}
+                  </DialogDescription>
+                </DialogHeader>
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="col-span-2">
+                      <Label htmlFor="name">Product Name *</Label>
+                      <Input
+                        id="name"
+                        value={formData.name}
+                        onChange={(e) =>
+                          setFormData({ ...formData, name: e.target.value })
+                        }
+                        placeholder="Enter product name"
+                        required
+                      />
+                    </div>
+                    <div className="col-span-2">
+                      <Label htmlFor="categories">Categories *</Label>
+                      <div className="grid grid-cols-2 gap-3 p-4 border rounded-md bg-gray-50">
+                        {categories.map((cat) => (
+                          <div
+                            key={cat.id}
+                            className="flex items-center space-x-2"
+                          >
+                            <Checkbox
+                              id={cat.id}
+                              checked={formData.categories.includes(cat.name)}
+                              onCheckedChange={(checked) => {
+                                if (checked) {
+                                  setFormData({
+                                    ...formData,
+                                    categories: [
+                                      ...formData.categories,
+                                      cat.name,
+                                    ],
+                                  });
+                                } else {
+                                  setFormData({
+                                    ...formData,
+                                    categories: formData.categories.filter(
+                                      (c) => c !== cat.name,
+                                    ),
+                                  });
+                                }
+                              }}
+                            />
+                            <Label
+                              htmlFor={cat.id}
+                              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                            >
+                              {cat.name}
+                            </Label>
+                          </div>
+                        ))}
                       </div>
-                    ))}
+                      {formData.categories.length === 0 && (
+                        <p className="text-sm text-red-500 mt-1">
+                          Please select at least one category
+                        </p>
+                      )}
+                    </div>
+                    <div>
+                      <Label htmlFor="price">Price (Optional)</Label>
+                      <Input
+                        id="price"
+                        type="number"
+                        value={formData.price || ""}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            price: e.target.value
+                              ? Number(e.target.value)
+                              : undefined,
+                          })
+                        }
+                        placeholder="Leave empty if no price"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="displayOrder">Display Order</Label>
+                      <Input
+                        id="displayOrder"
+                        type="number"
+                        value={formData.displayOrder || ""}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            displayOrder: e.target.value
+                              ? Number(e.target.value)
+                              : undefined,
+                          })
+                        }
+                        placeholder="Lower numbers appear first"
+                      />
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Lower numbers will be displayed first (e.g., 1, 2, 3...)
+                      </p>
+                    </div>
+                    <div className="col-span-2">
+                      <ImageUpload
+                        label="Product Image"
+                        value={formData.imageUrl}
+                        onChange={(url) =>
+                          setFormData({ ...formData, imageUrl: url })
+                        }
+                        required
+                      />
+                    </div>
+                    <div className="col-span-2">
+                      <Label htmlFor="description">Description *</Label>
+                      <Textarea
+                        id="description"
+                        value={formData.description}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            description: e.target.value,
+                          })
+                        }
+                        placeholder="Enter product description"
+                        rows={4}
+                        required
+                      />
+                    </div>
                   </div>
-                  {formData.categories.length === 0 && (
-                    <p className="text-sm text-red-500 mt-1">Please select at least one category</p>
-                  )}
-                </div>
-                <div>
-                  <Label htmlFor="price">Price (Optional)</Label>
-                  <Input
-                    id="price"
-                    type="number"
-                    value={formData.price || ""}
-                    onChange={(e) => setFormData({ ...formData, price: e.target.value ? Number(e.target.value) : undefined })}
-                    placeholder="Leave empty if no price"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="displayOrder">Display Order</Label>
-                  <Input
-                    id="displayOrder"
-                    type="number"
-                    value={formData.displayOrder || ""}
-                    onChange={(e) => setFormData({ ...formData, displayOrder: e.target.value ? Number(e.target.value) : undefined })}
-                    placeholder="Lower numbers appear first"
-                  />
-                  <p className="text-xs text-muted-foreground mt-1">Lower numbers will be displayed first (e.g., 1, 2, 3...)</p>
-                </div>
-                <div className="col-span-2">
-                  <ImageUpload
-                    label="Product Image"
-                    value={formData.imageUrl}
-                    onChange={(url) => setFormData({ ...formData, imageUrl: url })}
-                    required
-                  />
-                </div>
-                <div className="col-span-2">
-                  <Label htmlFor="description">Description *</Label>
-                  <Textarea
-                    id="description"
-                    value={formData.description}
-                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    placeholder="Enter product description"
-                    rows={4}
-                    required
-                  />
-                </div>
-              </div>
-              <div className="flex justify-end gap-2 pt-4">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => {
-                    setIsDialogOpen(false);
-                    resetForm();
-                  }}
-                >
-                  Cancel
-                </Button>
-                <Button type="submit" className="bg-gradient-to-r from-gray-900 to-gray-700 hover:from-gray-800 hover:to-gray-600">
-                  {editingProduct ? "Update Product" : "Add Product"}
-                </Button>
-              </div>
-            </form>
-          </DialogContent>
-        </Dialog>
+                  <div className="flex justify-end gap-2 pt-4">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => {
+                        setIsDialogOpen(false);
+                        resetForm();
+                      }}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      type="submit"
+                      className="bg-gradient-to-r from-gray-900 to-gray-700 hover:from-gray-800 hover:to-gray-600"
+                    >
+                      {editingProduct ? "Update Product" : "Add Product"}
+                    </Button>
+                  </div>
+                </form>
+              </DialogContent>
+            </Dialog>
           </div>
         </div>
 
         {/* Filters */}
-      <div className="flex gap-4 items-center bg-white p-4 rounded-lg border">
-        <div className="flex-1 relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-          <Input
-            placeholder="Search products..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10"
-          />
-        </div>
-        <Select value={filterCategory} onValueChange={setFilterCategory}>
-          <SelectTrigger className="w-48">
-            <SelectValue placeholder="All Categories" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Categories</SelectItem>
-            {categories.map((cat) => (
-              <SelectItem key={cat.id} value={cat.name}>
-                {cat.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
-      {/* Products Table */}
-      <div className="bg-white rounded-lg border">
-        {/* Info banner */}
-        <div className="px-4 py-2 bg-gray-50 border-b border-gray-200 text-sm text-gray-600">
-          <span className="font-medium">ℹ️ Products are sorted by:</span> Category (alphabetically) → Date Added (oldest first)
-        </div>
-        {loading ? (
-          <div className="p-8 text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto"></div>
-            <p className="mt-4 text-gray-500">Loading products...</p>
+        <div className="flex gap-4 items-center bg-white p-4 rounded-lg border">
+          <div className="flex-1 relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+            <Input
+              placeholder="Search products..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10"
+            />
           </div>
-        ) : filteredProducts.length === 0 ? (
-          <div className="p-8 text-center">
-            <Package className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">No products found</h3>
-            <p className="text-gray-500 mb-4">
-              {searchQuery || filterCategory !== "all"
-                ? "Try adjusting your search or filters"
-                : "Get started by adding your first product"}
+          <Select value={filterCategory} onValueChange={setFilterCategory}>
+            <SelectTrigger className="w-48">
+              <SelectValue placeholder="All Categories" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Categories</SelectItem>
+              {categories.map((cat) => (
+                <SelectItem key={cat.id} value={cat.name}>
+                  {cat.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Products Table */}
+        <div className="bg-white rounded-lg border">
+          {/* Info banner */}
+          <div className="px-4 py-2 bg-gray-50 border-b border-gray-200 text-sm text-gray-600">
+            <span className="font-medium">ℹ️ Products are sorted by:</span>{" "}
+            Category (alphabetically) → Date Added (oldest first)
+          </div>
+          {loading ? (
+            <div className="p-8 text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto"></div>
+              <p className="mt-4 text-gray-500">Loading products...</p>
+            </div>
+          ) : filteredProducts.length === 0 ? (
+            <div className="p-8 text-center">
+              <Package className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                No products found
+              </h3>
+              <p className="text-gray-500 mb-4">
+                {searchQuery || filterCategory !== "all"
+                  ? "Try adjusting your search or filters"
+                  : "Get started by adding your first product"}
+              </p>
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Image</TableHead>
+                  <TableHead>Product Name</TableHead>
+                  <TableHead>Categories</TableHead>
+                  <TableHead>Price</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredProducts.map((product) => (
+                  <TableRow
+                    key={product.id}
+                    className={`${
+                      newlyAddedProductId === product.id
+                        ? "animate-new-product"
+                        : ""
+                    }`}
+                  >
+                    <TableCell>
+                      <img
+                        src={product.imageUrl}
+                        alt={product.name}
+                        className="w-16 h-16 object-cover rounded"
+                      />
+                    </TableCell>
+                    <TableCell className="font-medium">
+                      {product.name}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex flex-wrap gap-1">
+                        {(product.categories || [])
+                          .filter((cat) => !cat.includes("Accessories"))
+                          .map((cat, index) => (
+                            <Badge
+                              key={index}
+                              variant="outline"
+                              className="text-xs"
+                            >
+                              {cat}
+                            </Badge>
+                          ))}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      {product.price && product.price > 0
+                        ? `₹${product.price}`
+                        : ""}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex justify-end gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleEdit(product)}
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleDelete(product.id)}
+                          className="text-red-600 hover:text-red-700"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+        </div>
+
+        {/* Stats */}
+        <div className="grid grid-cols-2 gap-4">
+          <div className="bg-gradient-to-br from-purple-50 to-pink-50 p-4 rounded-lg border border-purple-100">
+            <p className="text-sm text-gray-600">Total Products</p>
+            <p className="text-2xl font-bold text-purple-600">
+              {products.length}
             </p>
           </div>
-        ) : (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Image</TableHead>
-                <TableHead>Product Name</TableHead>
-                <TableHead>Categories</TableHead>
-                <TableHead>Price</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredProducts.map((product) => (
-                <TableRow 
-                  key={product.id}
-                  className={`${
-                    newlyAddedProductId === product.id 
-                      ? 'animate-new-product' 
-                      : ''
-                  }`}
-                >
-                  <TableCell>
-                    <img
-                      src={product.imageUrl}
-                      alt={product.name}
-                      className="w-16 h-16 object-cover rounded"
-                    />
-                  </TableCell>
-                  <TableCell className="font-medium">{product.name}</TableCell>
-                  <TableCell>
-                    <div className="flex flex-wrap gap-1">
-                      {(product.categories || []).filter(cat => !cat.includes("Accessories")).map((cat, index) => (
-                        <Badge key={index} variant="outline" className="text-xs">
-                          {cat}
-                        </Badge>
-                      ))}
-                    </div>
-                  </TableCell>
-                  <TableCell>{product.price && product.price > 0 ? `₹${product.price}` : ""}</TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleEdit(product)}
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleDelete(product.id)}
-                        className="text-red-600 hover:text-red-700"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        )}
-      </div>
-
-      {/* Stats */}
-      <div className="grid grid-cols-2 gap-4">
-        <div className="bg-gradient-to-br from-purple-50 to-pink-50 p-4 rounded-lg border border-purple-100">
-          <p className="text-sm text-gray-600">Total Products</p>
-          <p className="text-2xl font-bold text-purple-600">{products.length}</p>
-        </div>
-        <div className="bg-gradient-to-br from-orange-50 to-red-50 p-4 rounded-lg border border-orange-100">
-          <p className="text-sm text-gray-600">Categories Used</p>
-          <p className="text-2xl font-bold text-orange-600">
-            {new Set(products.flatMap((p) => (p.categories || []).filter(cat => !cat.includes("Accessories")))).size}
-          </p>
+          <div className="bg-gradient-to-br from-orange-50 to-red-50 p-4 rounded-lg border border-orange-100">
+            <p className="text-sm text-gray-600">Categories Used</p>
+            <p className="text-2xl font-bold text-orange-600">
+              {
+                new Set(
+                  products.flatMap((p) =>
+                    (p.categories || []).filter(
+                      (cat) => !cat.includes("Accessories"),
+                    ),
+                  ),
+                ).size
+              }
+            </p>
+          </div>
         </div>
       </div>
-    </div>
     </AdminLayout>
   );
 };
