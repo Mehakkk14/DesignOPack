@@ -4,21 +4,26 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Package, ArrowLeft } from "lucide-react";
 import ProductDetailsModal from "@/components/ProductDetailsModal";
-import { getProducts, Product } from "@/lib/firebaseService";
+import {
+  getProducts,
+  getProductMedia,
+  getPrimaryProductImage,
+  Product,
+} from "@/lib/firebaseService";
 import { logger } from "@/lib/logger";
 
 const ProductCategory = () => {
   const { categoryName } = useParams<{ categoryName: string }>();
   const navigate = useNavigate();
-  
+
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<{
     name: string;
-    description: string;
+    description?: string;
     categories: string[];
-    images: string[];
+    media: ReturnType<typeof getProductMedia>;
   } | null>(null);
 
   useEffect(() => {
@@ -26,25 +31,37 @@ const ProductCategory = () => {
   }, [categoryName]);
 
   const loadProducts = async () => {
-    logger.emoji.loading('🔄 ProductCategory: Loading products for category:', categoryName);
+    logger.emoji.loading(
+      "🔄 ProductCategory: Loading products for category:",
+      categoryName,
+    );
     try {
       const result = await getProducts();
       if (result.success) {
-        logger.emoji.loading('✅ ProductCategory: Products loaded successfully:', result.products);
+        logger.emoji.loading(
+          "✅ ProductCategory: Products loaded successfully:",
+          result.products,
+        );
         // Ensure displayOrder is a number
-        const productsWithOrder = result.products.map(product => ({
+        const productsWithOrder = result.products.map((product) => ({
           ...product,
-          displayOrder: product.displayOrder !== undefined ? Number(product.displayOrder) : undefined
+          displayOrder:
+            product.displayOrder !== undefined
+              ? Number(product.displayOrder)
+              : undefined,
         }));
-        
+
         // Filter by category
         const decodedCategory = decodeURIComponent(categoryName || "");
         const filteredByCategory = productsWithOrder.filter(
-          p => p.categories && p.categories.includes(decodedCategory)
+          (p) => p.categories && p.categories.includes(decodedCategory),
         );
-        
-        logger.emoji.loading('✅ ProductCategory: Filtered products:', filteredByCategory);
-        
+
+        logger.emoji.loading(
+          "✅ ProductCategory: Filtered products:",
+          filteredByCategory,
+        );
+
         // Sort by displayOrder
         const sorted = [...filteredByCategory].sort((a, b) => {
           if (a.displayOrder !== undefined && b.displayOrder !== undefined) {
@@ -54,13 +71,16 @@ const ProductCategory = () => {
           if (b.displayOrder !== undefined) return 1;
           return a.name.localeCompare(b.name);
         });
-        
+
         setProducts(sorted);
       } else {
-        logger.emoji.error('❌ ProductCategory: Failed to load products:', result.error);
+        logger.emoji.error(
+          "❌ ProductCategory: Failed to load products:",
+          result.error,
+        );
       }
     } catch (error) {
-      logger.emoji.error('❌ ProductCategory: Error loading products:', error);
+      logger.emoji.error("❌ ProductCategory: Error loading products:", error);
     }
     setLoading(false);
   };
@@ -70,7 +90,7 @@ const ProductCategory = () => {
       name: product.name,
       description: product.description,
       categories: product.categories || [],
-      images: [product.imageUrl]
+      media: getProductMedia(product),
     });
     setIsDetailsModalOpen(true);
   };
@@ -81,11 +101,11 @@ const ProductCategory = () => {
     <div className="min-h-screen pt-20">
       {/* Hero Section */}
       <section className="relative h-[40vh] flex items-center justify-center overflow-hidden bg-gradient-to-br from-secondary to-black">
-        <div 
+        <div
           className="absolute inset-0 bg-cover bg-center opacity-20"
           role="presentation"
           style={{
-            backgroundImage: "url('/ourproducts.webp')"
+            backgroundImage: "url('/ourproducts.webp')",
           }}
         />
         <div className="container mx-auto px-4 relative z-10 text-center">
@@ -93,7 +113,8 @@ const ProductCategory = () => {
             {decodedCategoryName}
           </h1>
           <p className="text-xl text-white/90 font-body max-w-2xl mx-auto animate-slide-up">
-            Discover our premium collection of {decodedCategoryName.toLowerCase()}
+            Discover our premium collection of{" "}
+            {decodedCategoryName.toLowerCase()}
           </p>
         </div>
       </section>
@@ -117,12 +138,19 @@ const ProductCategory = () => {
           {loading ? (
             <div className="text-center py-12">
               <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-primary mx-auto mb-4"></div>
-              <p className="text-foreground text-lg font-body">Loading products...</p>
+              <p className="text-foreground text-lg font-body">
+                Loading products...
+              </p>
             </div>
           ) : products.length === 0 ? (
             <div className="text-center py-12">
-              <Package className="mx-auto mb-4 text-muted-foreground" size={48} />
-              <p className="text-foreground text-lg font-body">No products in this category</p>
+              <Package
+                className="mx-auto mb-4 text-muted-foreground"
+                size={48}
+              />
+              <p className="text-foreground text-lg font-body">
+                No products in this category
+              </p>
               <p className="text-sm text-muted-foreground font-body mt-2">
                 Products will be added by the admin
               </p>
@@ -130,7 +158,7 @@ const ProductCategory = () => {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {products.map((product, index) => (
-                <Card 
+                <Card
                   key={product.id || index}
                   className="group overflow-hidden hover-lift animate-scale-in relative"
                   style={{ animationDelay: `${index * 50}ms` }}
@@ -138,19 +166,20 @@ const ProductCategory = () => {
                   {/* Product Image Container */}
                   <div className="relative h-60 overflow-hidden flex items-center justify-center bg-white">
                     <img
-                      src={product.imageUrl}
+                      src={getPrimaryProductImage(product)}
                       alt={product.name}
                       loading="lazy"
                       decoding="async"
                       className="max-w-full max-h-full object-contain transition-transform duration-500 group-hover:scale-105"
                       onError={(e) => {
                         const target = e.target as HTMLImageElement;
-                        target.src = "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=600&q=80";
+                        target.src =
+                          "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=600&q=80";
                       }}
                     />
                     {/* Hover View Details Button */}
                     <div className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                      <Button 
+                      <Button
                         variant="secondary"
                         size="sm"
                         onClick={() => handleViewDetails(product)}
@@ -179,7 +208,7 @@ const ProductCategory = () => {
 
       {/* Product Details Modal */}
       {selectedProduct && (
-        <ProductDetailsModal 
+        <ProductDetailsModal
           isOpen={isDetailsModalOpen}
           onClose={() => {
             setIsDetailsModalOpen(false);
@@ -188,7 +217,7 @@ const ProductCategory = () => {
           productName={selectedProduct.name}
           productDescription={selectedProduct.description}
           productCategories={selectedProduct.categories}
-          productImages={selectedProduct.images}
+          productMedia={selectedProduct.media}
         />
       )}
     </div>

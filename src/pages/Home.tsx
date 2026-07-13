@@ -118,7 +118,7 @@ const Home = () => {
     },
     {
       icon: BedDouble,
-      title: "In-Room Accessories",
+      title: "Room Amenities",
       description:
         "Premium menu folders, trays, tissue boxes, and more in elegant Leatherette",
       routeCategory: "Room Amenities",
@@ -143,7 +143,7 @@ const Home = () => {
     },
     {
       icon: Gift,
-      title: "Gifting Solutions",
+      title: "Gifting",
       description:
         "Customized hampers, photo frames, greeting cards, and corporate gifts",
       routeCategory: "Gifting",

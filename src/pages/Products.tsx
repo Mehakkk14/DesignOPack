@@ -47,11 +47,11 @@ const Products = () => {
   const normalizeCategoryName = (name: string) => name.trim().toUpperCase();
 
   const categoryDisplayNameMap: { [key: string]: string } = {
-    "IN-ROOM ACCESSORIES": "In-Room Accessories",
-    "ROOM AMENITIES": "In-Room Accessories",
+    "IN-ROOM ACCESSORIES": "Room Amenities",
+    "ROOM AMENITIES": "Room Amenities",
     "BATHROOM ACCESSORIES": "Bathroom Amenities",
     "BATHROOM AMENITIES": "Bathroom Amenities",
-    GIFTING: "Gifting Solutions",
+    GIFTING: "Gifting",
     "FOOD PACKAGING": "Food Packaging",
     "RESTAURANT & BAR ACCESSORIES": "Restaurant and Bar Menu",
     "RESTAURANT AND BAR AMENITIES": "Restaurant and Bar Menu",

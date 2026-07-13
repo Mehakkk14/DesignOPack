@@ -22,13 +22,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
@@ -39,12 +32,36 @@ import {
   updateProduct,
   deleteProduct,
   getCategories,
+  getPrimaryProductImage,
+  getProductMedia,
   Product,
   Category,
+  ProductImage,
 } from "@/lib/firebaseService";
 import { useToast } from "@/hooks/use-toast";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { ImageUpload } from "@/components/ui/image-upload";
+
+type ProductFormData = {
+  name: string;
+  categories: string[];
+  description: string;
+  media: ProductImage[];
+  price?: number;
+  displayOrder?: number;
+};
+
+const createEmptyMediaSlots = (): ProductImage[] =>
+  Array.from({ length: 3 }, () => ({ imageUrl: "", description: "" }));
+
+const createBlankFormData = (): ProductFormData => ({
+  name: "",
+  categories: [],
+  description: "",
+  media: createEmptyMediaSlots(),
+  price: undefined,
+  displayOrder: undefined,
+});
 
 const AdminProducts = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -52,7 +69,7 @@ const AdminProducts = () => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
-  const [filterCategory, setFilterCategory] = useState("all");
+  const [selectedCategory, setSelectedCategory] = useState("all");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [newlyAddedProductId, setNewlyAddedProductId] = useState<string | null>(
@@ -61,14 +78,9 @@ const AdminProducts = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  const [formData, setFormData] = useState({
-    name: "",
-    categories: [] as string[],
-    description: "",
-    imageUrl: "",
-    price: undefined as number | undefined,
-    displayOrder: undefined as number | undefined,
-  });
+  const [formData, setFormData] = useState<ProductFormData>(
+    createBlankFormData(),
+  );
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -76,6 +88,7 @@ const AdminProducts = () => {
         navigate("/admin/login");
         return;
       }
+
       setIsAuthenticated(true);
       setLoading(false);
       await loadProducts();
@@ -90,61 +103,95 @@ const AdminProducts = () => {
     "Bathroom Equipments": "Bathroom Amenities",
   };
 
-  const normalizeCategories = (categories: string[]) => {
-    const normalized = categories
+  const normalizeCategories = (categoryList: string[]) => {
+    return categoryList
       .map((category) => legacyCategoryNameMap[category] || category)
       .filter((category, index, list) => list.indexOf(category) === index);
+  };
 
-    return normalized;
+  const getNextDisplayOrder = (categoryName: string) => {
+    const categoryProducts = products.filter((product) =>
+      product.categories?.includes(categoryName),
+    );
+
+    if (categoryProducts.length === 0) {
+      return 1;
+    }
+
+    const displayOrders = categoryProducts
+      .map((product) => Number(product.displayOrder || 0))
+      .filter((displayOrder) => displayOrder > 0);
+
+    if (displayOrders.length === 0) {
+      return categoryProducts.length + 1;
+    }
+
+    return Math.max(...displayOrders) + 1;
+  };
+
+  const buildEditableMedia = (product: Product) => {
+    const slots = createEmptyMediaSlots();
+    getProductMedia(product)
+      .slice(0, 3)
+      .forEach((media, index) => {
+        slots[index] = {
+          imageUrl: media.imageUrl,
+          description: media.description || "",
+        };
+      });
+
+    return slots;
   };
 
   const loadProducts = async () => {
     logger.emoji.loading("AdminProducts: Loading products...");
     try {
       const result = await getProducts();
-      if (result.success) {
-        const normalizedProducts = result.products.map((product) => {
-          const originalCategories = product.categories || [];
-          const normalizedCategories = normalizeCategories(originalCategories);
-          return {
-            ...product,
-            originalCategories,
-            categories: normalizedCategories,
-          };
-        });
-
-        logger.emoji.success(
-          "AdminProducts: Products loaded successfully:",
-          normalizedProducts,
-        );
-        setProducts(normalizedProducts);
-
-        const productsNeedingCleanup = normalizedProducts.filter((product) => {
-          const originalCategories = product.originalCategories || [];
-          const cleanedCategories = product.categories || [];
-          return (
-            cleanedCategories.length !== originalCategories.length ||
-            cleanedCategories.some(
-              (category, index) => category !== originalCategories[index],
-            )
-          );
-        });
-
-        if (productsNeedingCleanup.length > 0) {
-          await Promise.all(
-            productsNeedingCleanup.map((product) =>
-              updateProduct(product.id!, { categories: product.categories }),
-            ),
-          );
-          logger.emoji.success(
-            "AdminProducts: Cleaned legacy category tags:",
-            productsNeedingCleanup.length,
-          );
-        }
-      } else {
+      if (!result.success) {
         logger.emoji.error(
           "AdminProducts: Failed to load products:",
           result.error,
+        );
+        return;
+      }
+
+      const normalizedProducts = result.products.map((product) => ({
+        ...product,
+        categories: normalizeCategories(product.categories || []),
+      }));
+
+      logger.emoji.success(
+        "AdminProducts: Products loaded successfully:",
+        normalizedProducts,
+      );
+      setProducts(normalizedProducts);
+
+      const productsNeedingCleanup = result.products.filter(
+        (product, index) => {
+          const originalCategories = product.categories || [];
+          const cleanedCategories = normalizedProducts[index].categories || [];
+
+          return (
+            cleanedCategories.length !== originalCategories.length ||
+            cleanedCategories.some(
+              (category, itemIndex) =>
+                category !== originalCategories[itemIndex],
+            )
+          );
+        },
+      );
+
+      if (productsNeedingCleanup.length > 0) {
+        await Promise.all(
+          productsNeedingCleanup.map((product, index) =>
+            updateProduct(product.id!, {
+              categories: normalizedProducts[index].categories,
+            }),
+          ),
+        );
+        logger.emoji.success(
+          "AdminProducts: Cleaned legacy category tags:",
+          productsNeedingCleanup.length,
         );
       }
     } catch (error) {
@@ -181,7 +228,6 @@ const AdminProducts = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Validate that at least one category is selected
     if (formData.categories.length === 0) {
       toast({
         title: "Error",
@@ -194,27 +240,35 @@ const AdminProducts = () => {
     try {
       logger.emoji.loading("AdminProducts: Submitting product data:", formData);
 
-      // Validate required fields
-      if (!formData.name || !formData.description || !formData.imageUrl) {
+      const media = formData.media
+        .map((item) => ({
+          imageUrl: item.imageUrl.trim(),
+          description: item.description?.trim() || "",
+        }))
+        .filter((item) => item.imageUrl);
+
+      if (!formData.name || media.length === 0) {
         throw new Error("Missing required fields");
       }
 
       const cleanedCategories = normalizeCategories(formData.categories);
 
-      const productData: any = {
+      const productData: Partial<Product> = {
         name: formData.name,
         categories: cleanedCategories,
-        description: formData.description,
-        imageUrl: formData.imageUrl,
+        description: formData.description.trim() || undefined,
+        imageUrl: media[0].imageUrl,
+        media: media.map((item) => ({
+          imageUrl: item.imageUrl,
+          ...(item.description ? { description: item.description } : {}),
+        })),
         inStock: true,
       };
 
-      // Only add price if it exists and is greater than 0
       if (formData.price && formData.price > 0) {
         productData.price = formData.price;
       }
 
-      // Add display order if provided
       if (
         formData.displayOrder !== undefined &&
         formData.displayOrder !== null
@@ -223,7 +277,8 @@ const AdminProducts = () => {
       }
 
       logger.emoji.loading("AdminProducts: Final product data:", productData);
-      if (editingProduct) {
+
+      if (editingProduct?.id) {
         logger.emoji.loading(
           "AdminProducts: Updating existing product:",
           editingProduct.id,
@@ -237,28 +292,24 @@ const AdminProducts = () => {
         setNewlyAddedProductId(editingProduct.id);
       } else {
         logger.emoji.loading("AdminProducts: Adding new product");
-        const result = await addProduct(productData);
+        const result = await addProduct(productData as Product);
         logger.emoji.success("AdminProducts: Product add result:", result);
         if (!result.success) {
           throw new Error(result.error || "Failed to add product");
         }
-        // Track the newly added product ID for animation
+
         if (result.id) {
           setNewlyAddedProductId(result.id);
         }
-        toast({
-          title: "Success",
-          description: "Product added successfully",
-        });
+
+        toast({ title: "Success", description: "Product added successfully" });
       }
+
       resetForm();
       setIsDialogOpen(false);
-      logger.emoji.loading(
-        "AdminProducts: Reloading products after save (keeping filters)...",
-      );
-      // Reload products without resetting filters - products will appear in sorted position
+
+      logger.emoji.loading("AdminProducts: Reloading products after save...");
       await loadProducts();
-      // Clear the newly added indicator after animation completes (1s animation + 200ms buffer)
       setTimeout(() => setNewlyAddedProductId(null), 1200);
     } catch (error) {
       logger.error("Error saving product:", error);
@@ -271,12 +322,14 @@ const AdminProducts = () => {
   };
 
   const handleEdit = (product: Product) => {
+    const primaryCategory = product.categories?.[0] || "all";
     setEditingProduct(product);
+    setSelectedCategory(primaryCategory);
     setFormData({
       name: product.name,
       categories: product.categories || [],
-      description: product.description,
-      imageUrl: product.imageUrl,
+      description: product.description || "",
+      media: buildEditableMedia(product),
       price: product.price && product.price > 0 ? product.price : undefined,
       displayOrder: product.displayOrder,
     });
@@ -284,68 +337,81 @@ const AdminProducts = () => {
   };
 
   const handleDelete = async (id: string) => {
-    if (confirm("Are you sure you want to delete this product?")) {
-      try {
-        await deleteProduct(id);
-        toast({
-          title: "Success",
-          description: "Product deleted successfully",
-        });
-        loadProducts();
-      } catch (error) {
-        logger.error("Error deleting product:", error);
-        toast({
-          title: "Error",
-          description: "Failed to delete product",
-          variant: "destructive",
-        });
-      }
+    if (!confirm("Are you sure you want to delete this product?")) {
+      return;
+    }
+
+    try {
+      await deleteProduct(id);
+      toast({ title: "Success", description: "Product deleted successfully" });
+      await loadProducts();
+    } catch (error) {
+      logger.error("Error deleting product:", error);
+      toast({
+        title: "Error",
+        description: "Failed to delete product",
+        variant: "destructive",
+      });
     }
   };
 
   const resetForm = () => {
-    setFormData({
-      name: "",
-      categories: [],
-      description: "",
-      imageUrl: "",
-      price: undefined,
-    });
+    setFormData(createBlankFormData());
     setEditingProduct(null);
   };
 
   const handleAddProductClick = () => {
-    // When opening dialog for new product, auto-assign filtered category
-    if (filterCategory !== "all") {
-      setFormData((prev) => ({
-        ...prev,
-        categories: normalizeCategories([filterCategory]),
-      }));
+    if (selectedCategory === "all") {
+      toast({
+        title: "Select a category",
+        description: "Choose a category first before adding a product.",
+      });
+      return;
     }
+
+    setFormData({
+      ...createBlankFormData(),
+      categories: normalizeCategories([selectedCategory]),
+      displayOrder: getNextDisplayOrder(selectedCategory),
+    });
     setIsDialogOpen(true);
   };
 
-  const filteredProducts = products.filter((product) => {
-    const matchesSearch =
-      product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      product.description.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory =
-      filterCategory === "all" ||
-      (product.categories && product.categories.includes(filterCategory));
-    return matchesSearch && matchesCategory;
-  });
+  const visibleProducts = products
+    .filter((product) => {
+      if (selectedCategory === "all") {
+        return false;
+      }
 
-  // Debug logging for filtered products
+      return product.categories?.includes(selectedCategory);
+    })
+    .filter((product) => {
+      const query = searchQuery.toLowerCase();
+      const matchesSearch =
+        product.name.toLowerCase().includes(query) ||
+        (product.description || "").toLowerCase().includes(query) ||
+        getProductMedia(product).some((media) =>
+          (media.description || "").toLowerCase().includes(query),
+        );
+
+      return matchesSearch;
+    })
+    .sort((a, b) => {
+      const orderA = a.displayOrder ?? Number.MAX_SAFE_INTEGER;
+      const orderB = b.displayOrder ?? Number.MAX_SAFE_INTEGER;
+
+      if (orderA !== orderB) {
+        return orderA - orderB;
+      }
+
+      return a.name.localeCompare(b.name);
+    });
+
   logger.debug("AdminProducts filter state:", {
-    filterCategory,
+    selectedCategory,
     searchQuery,
     totalProducts: products.length,
-    filteredProducts: filteredProducts.length,
-    products: products.map((p) => ({
-      id: p.id,
-      name: p.name,
-      categories: p.categories,
-    })),
+    filteredProducts: visibleProducts.length,
   });
 
   if (loading) {
@@ -366,12 +432,12 @@ const AdminProducts = () => {
   return (
     <AdminLayout>
       <div className="space-y-6">
-        {/* Header */}
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Products</h1>
             <p className="text-gray-500 mt-1">Manage your product catalog</p>
           </div>
+
           <div className="flex gap-2">
             <Button
               variant="outline"
@@ -382,36 +448,43 @@ const AdminProducts = () => {
             >
               Refresh
             </Button>
+
             <Dialog
               open={isDialogOpen}
               onOpenChange={(open) => {
                 setIsDialogOpen(open);
-                if (!open) resetForm();
+                if (!open) {
+                  resetForm();
+                }
               }}
             >
               <DialogTrigger asChild>
                 <Button
                   className="bg-gradient-to-r from-gray-900 to-gray-700 hover:from-gray-800 hover:to-gray-600"
                   onClick={handleAddProductClick}
+                  disabled={selectedCategory === "all"}
                 >
                   <Plus className="mr-2 h-4 w-4" />
                   Add Product
                 </Button>
               </DialogTrigger>
-              <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+              <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                   <DialogTitle>
                     {editingProduct ? "Edit Product" : "Add New Product"}
                   </DialogTitle>
                   <DialogDescription>
-                    {editingProduct
-                      ? "Update product information"
-                      : "Add a new product to your catalog"}
+                    {selectedCategory === "all"
+                      ? "Pick a category first"
+                      : editingProduct
+                        ? "Update product information"
+                        : `Add a new product inside ${selectedCategory}`}
                   </DialogDescription>
                 </DialogHeader>
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="col-span-2">
+
+                <form onSubmit={handleSubmit} className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="md:col-span-2">
                       <Label htmlFor="name">Product Name *</Label>
                       <Input
                         id="name"
@@ -423,9 +496,10 @@ const AdminProducts = () => {
                         required
                       />
                     </div>
-                    <div className="col-span-2">
-                      <Label htmlFor="categories">Categories *</Label>
-                      <div className="grid grid-cols-2 gap-3 p-4 border rounded-md bg-gray-50">
+
+                    <div className="md:col-span-2">
+                      <Label>Categories *</Label>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-4 border rounded-md bg-gray-50">
                         {categories.map((cat) => (
                           <div
                             key={cat.id}
@@ -438,16 +512,16 @@ const AdminProducts = () => {
                                 if (checked) {
                                   setFormData({
                                     ...formData,
-                                    categories: [
+                                    categories: normalizeCategories([
                                       ...formData.categories,
                                       cat.name,
-                                    ],
+                                    ]),
                                   });
                                 } else {
                                   setFormData({
                                     ...formData,
                                     categories: formData.categories.filter(
-                                      (c) => c !== cat.name,
+                                      (category) => category !== cat.name,
                                     ),
                                   });
                                 }
@@ -468,6 +542,7 @@ const AdminProducts = () => {
                         </p>
                       )}
                     </div>
+
                     <div>
                       <Label htmlFor="price">Price (Optional)</Label>
                       <Input
@@ -485,6 +560,7 @@ const AdminProducts = () => {
                         placeholder="Leave empty if no price"
                       />
                     </div>
+
                     <div>
                       <Label htmlFor="displayOrder">Display Order</Label>
                       <Input
@@ -502,21 +578,64 @@ const AdminProducts = () => {
                         placeholder="Lower numbers appear first"
                       />
                       <p className="text-xs text-muted-foreground mt-1">
-                        Lower numbers will be displayed first (e.g., 1, 2, 3...)
+                        Order is applied within the selected category.
                       </p>
                     </div>
-                    <div className="col-span-2">
-                      <ImageUpload
-                        label="Product Image"
-                        value={formData.imageUrl}
-                        onChange={(url) =>
-                          setFormData({ ...formData, imageUrl: url })
-                        }
-                        required
-                      />
+
+                    <div className="md:col-span-2">
+                      <Label className="text-sm font-medium">
+                        Product Images *
+                      </Label>
+                      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                        {formData.media.map((mediaItem, index) => (
+                          <div
+                            key={index}
+                            className="space-y-3 rounded-lg border p-4"
+                          >
+                            <ImageUpload
+                              label={`Image ${index + 1}`}
+                              value={mediaItem.imageUrl}
+                              onChange={(url) => {
+                                const nextMedia = [...formData.media];
+                                nextMedia[index] = {
+                                  ...nextMedia[index],
+                                  imageUrl: url,
+                                };
+                                setFormData({ ...formData, media: nextMedia });
+                              }}
+                              required={index === 0}
+                            />
+                            <div>
+                              <Label htmlFor={`media-description-${index}`}>
+                                Description (Optional)
+                              </Label>
+                              <Textarea
+                                id={`media-description-${index}`}
+                                value={mediaItem.description || ""}
+                                onChange={(e) => {
+                                  const nextMedia = [...formData.media];
+                                  nextMedia[index] = {
+                                    ...nextMedia[index],
+                                    description: e.target.value,
+                                  };
+                                  setFormData({
+                                    ...formData,
+                                    media: nextMedia,
+                                  });
+                                }}
+                                placeholder="Add a short description for this image"
+                                rows={3}
+                              />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
                     </div>
-                    <div className="col-span-2">
-                      <Label htmlFor="description">Description *</Label>
+
+                    <div className="md:col-span-2">
+                      <Label htmlFor="description">
+                        Product Description (Optional)
+                      </Label>
                       <Textarea
                         id="description"
                         value={formData.description}
@@ -526,12 +645,12 @@ const AdminProducts = () => {
                             description: e.target.value,
                           })
                         }
-                        placeholder="Enter product description"
+                        placeholder="Optional overall product description"
                         rows={4}
-                        required
                       />
                     </div>
                   </div>
+
                   <div className="flex justify-end gap-2 pt-4">
                     <Button
                       type="button"
@@ -556,53 +675,107 @@ const AdminProducts = () => {
           </div>
         </div>
 
-        {/* Filters */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <button
+            type="button"
+            onClick={() => {
+              setSelectedCategory("all");
+              setSearchQuery("");
+            }}
+            className={`text-left rounded-xl border p-4 transition-all ${
+              selectedCategory === "all"
+                ? "border-gray-900 bg-gray-900 text-white"
+                : "border-gray-200 bg-white hover:border-gray-400"
+            }`}
+          >
+            <p className="text-sm opacity-80">Overview</p>
+            <p className="text-lg font-semibold mt-1">All Categories</p>
+            <p className="text-sm mt-2 opacity-80">
+              {products.length} products
+            </p>
+          </button>
+
+          {categories.map((cat) => {
+            const productCount = products.filter((product) =>
+              product.categories?.includes(cat.name),
+            ).length;
+
+            return (
+              <button
+                key={cat.id}
+                type="button"
+                onClick={() => setSelectedCategory(cat.name)}
+                className={`text-left rounded-xl border p-4 transition-all ${
+                  selectedCategory === cat.name
+                    ? "border-primary bg-primary/5"
+                    : "border-gray-200 bg-white hover:border-gray-400"
+                }`}
+              >
+                <p className="text-sm text-gray-500">Category</p>
+                <p className="text-lg font-semibold mt-1">{cat.name}</p>
+                <p className="text-sm mt-2 text-gray-500">
+                  {productCount} products
+                </p>
+              </button>
+            );
+          })}
+        </div>
+
         <div className="flex gap-4 items-center bg-white p-4 rounded-lg border">
           <div className="flex-1 relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
             <Input
-              placeholder="Search products..."
+              placeholder={
+                selectedCategory === "all"
+                  ? "Select a category to search products"
+                  : "Search products in this category..."
+              }
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10"
+              disabled={selectedCategory === "all"}
             />
           </div>
-          <Select value={filterCategory} onValueChange={setFilterCategory}>
-            <SelectTrigger className="w-48">
-              <SelectValue placeholder="All Categories" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Categories</SelectItem>
-              {categories.map((cat) => (
-                <SelectItem key={cat.id} value={cat.name}>
-                  {cat.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <Button
+            variant="outline"
+            onClick={() => setSearchQuery("")}
+            disabled={selectedCategory === "all" || !searchQuery}
+          >
+            Clear
+          </Button>
         </div>
 
-        {/* Products Table */}
         <div className="bg-white rounded-lg border">
-          {/* Info banner */}
           <div className="px-4 py-2 bg-gray-50 border-b border-gray-200 text-sm text-gray-600">
             <span className="font-medium">ℹ️ Products are sorted by:</span>{" "}
-            Category (alphabetically) → Date Added (oldest first)
+            display order within the selected category
           </div>
-          {loading ? (
+
+          {selectedCategory === "all" ? (
+            <div className="p-8 text-center">
+              <Package className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                Select a category
+              </h3>
+              <p className="text-gray-500">
+                Choose a category above to manage its products and display
+                order.
+              </p>
+            </div>
+          ) : loading ? (
             <div className="p-8 text-center">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto"></div>
               <p className="mt-4 text-gray-500">Loading products...</p>
             </div>
-          ) : filteredProducts.length === 0 ? (
+          ) : visibleProducts.length === 0 ? (
             <div className="p-8 text-center">
               <Package className="h-12 w-12 text-gray-400 mx-auto mb-4" />
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
                 No products found
               </h3>
               <p className="text-gray-500 mb-4">
-                {searchQuery || filterCategory !== "all"
-                  ? "Try adjusting your search or filters"
+                {searchQuery
+                  ? "Try adjusting your search"
                   : "Get started by adding your first product"}
               </p>
             </div>
@@ -618,18 +791,18 @@ const AdminProducts = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredProducts.map((product) => (
+                {visibleProducts.map((product) => (
                   <TableRow
                     key={product.id}
-                    className={`${
+                    className={
                       newlyAddedProductId === product.id
                         ? "animate-new-product"
                         : ""
-                    }`}
+                    }
                   >
                     <TableCell>
                       <img
-                        src={product.imageUrl}
+                        src={getPrimaryProductImage(product)}
                         alt={product.name}
                         className="w-16 h-16 object-cover rounded"
                       />
@@ -639,17 +812,15 @@ const AdminProducts = () => {
                     </TableCell>
                     <TableCell>
                       <div className="flex flex-wrap gap-1">
-                        {(product.categories || [])
-                          .filter((cat) => !cat.includes("Accessories"))
-                          .map((cat, index) => (
-                            <Badge
-                              key={index}
-                              variant="outline"
-                              className="text-xs"
-                            >
-                              {cat}
-                            </Badge>
-                          ))}
+                        {(product.categories || []).map((cat, index) => (
+                          <Badge
+                            key={index}
+                            variant="outline"
+                            className="text-xs"
+                          >
+                            {cat}
+                          </Badge>
+                        ))}
                       </div>
                     </TableCell>
                     <TableCell>
@@ -669,7 +840,7 @@ const AdminProducts = () => {
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => handleDelete(product.id)}
+                          onClick={() => handleDelete(product.id!)}
                           className="text-red-600 hover:text-red-700"
                         >
                           <Trash2 className="h-4 w-4" />
@@ -683,7 +854,6 @@ const AdminProducts = () => {
           )}
         </div>
 
-        {/* Stats */}
         <div className="grid grid-cols-2 gap-4">
           <div className="bg-gradient-to-br from-purple-50 to-pink-50 p-4 rounded-lg border border-purple-100">
             <p className="text-sm text-gray-600">Total Products</p>
@@ -695,13 +865,8 @@ const AdminProducts = () => {
             <p className="text-sm text-gray-600">Categories Used</p>
             <p className="text-2xl font-bold text-orange-600">
               {
-                new Set(
-                  products.flatMap((p) =>
-                    (p.categories || []).filter(
-                      (cat) => !cat.includes("Accessories"),
-                    ),
-                  ),
-                ).size
+                new Set(products.flatMap((product) => product.categories || []))
+                  .size
               }
             </p>
           </div>
