@@ -1,9 +1,9 @@
-import React, { useState, useRef } from 'react';
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { Upload, X, ImageIcon } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { logger } from '@/lib/logger';
+import React, { useState, useRef } from "react";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Upload, X, ImageIcon } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { logger } from "@/lib/logger";
 
 interface ImageUploadProps {
   value?: string;
@@ -20,40 +20,60 @@ export function ImageUpload({
   disabled = false,
   label = "Image",
   required = false,
-  className
+  className,
 }: ImageUploadProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
-  const [preview, setPreview] = useState<string>(value || '');
+  const [preview, setPreview] = useState<string>(value || "");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleFileSelect = async (file: File) => {
-    if (!file.type.startsWith('image/')) {
-      alert('Please select an image file');
-      return;
-    }
+  const convertFileToWebp = (file: File) => {
+    return new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
 
-    if (file.size > 5 * 1024 * 1024) { // 5MB limit
-      alert('Image size must be less than 5MB');
+      reader.onload = (event) => {
+        const image = new Image();
+
+        image.onload = () => {
+          const canvas = document.createElement("canvas");
+          canvas.width = image.width;
+          canvas.height = image.height;
+
+          const context = canvas.getContext("2d");
+          if (!context) {
+            reject(new Error("Unable to process image"));
+            return;
+          }
+
+          context.drawImage(image, 0, 0);
+          resolve(canvas.toDataURL("image/webp", 0.82));
+        };
+
+        image.onerror = () => reject(new Error("Unable to load image"));
+        image.src = event.target?.result as string;
+      };
+
+      reader.onerror = () => reject(new Error("Unable to read file"));
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const handleFileSelect = async (file: File) => {
+    if (!file.type.startsWith("image/")) {
+      alert("Please select an image file");
       return;
     }
 
     setIsUploading(true);
 
     try {
-      // Convert to base64 for demo purposes
-      // In production, you'd upload to a cloud storage service
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const result = e.target?.result as string;
-        setPreview(result);
-        onChange(result);
-        setIsUploading(false);
-      };
-      reader.readAsDataURL(file);
+      const webpDataUrl = await convertFileToWebp(file);
+      setPreview(webpDataUrl);
+      onChange(webpDataUrl);
     } catch (error) {
-      logger.error('Upload failed:', error);
-      alert('Upload failed. Please try again.');
+      logger.error("Upload failed:", error);
+      alert("Upload failed. Please try again.");
+    } finally {
       setIsUploading(false);
     }
   };
@@ -61,7 +81,7 @@ export function ImageUpload({
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(false);
-    
+
     const files = Array.from(e.dataTransfer.files);
     if (files.length > 0) {
       handleFileSelect(files[0]);
@@ -86,10 +106,10 @@ export function ImageUpload({
   };
 
   const removeImage = () => {
-    setPreview('');
-    onChange('');
+    setPreview("");
+    onChange("");
     if (fileInputRef.current) {
-      fileInputRef.current.value = '';
+      fileInputRef.current.value = "";
     }
   };
 
@@ -98,7 +118,7 @@ export function ImageUpload({
       <Label className="text-sm font-medium">
         {label} {required && <span className="text-red-500">*</span>}
       </Label>
-      
+
       {preview ? (
         <div className="relative">
           <div className="relative w-full h-48 rounded-lg overflow-hidden border border-gray-200">
@@ -123,8 +143,10 @@ export function ImageUpload({
         <div
           className={cn(
             "border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors",
-            isDragging ? "border-primary bg-primary/5" : "border-gray-300 hover:border-gray-400",
-            disabled && "opacity-50 cursor-not-allowed"
+            isDragging
+              ? "border-primary bg-primary/5"
+              : "border-gray-300 hover:border-gray-400",
+            disabled && "opacity-50 cursor-not-allowed",
           )}
           onDrop={handleDrop}
           onDragOver={handleDragOver}
@@ -139,16 +161,18 @@ export function ImageUpload({
                 <Upload className="h-8 w-8 text-gray-600" />
               )}
             </div>
-            
+
             <div className="space-y-2">
               <p className="text-sm font-medium text-gray-900">
-                {isUploading ? "Uploading..." : "Drop image here or click to browse"}
+                {isUploading
+                  ? "Uploading..."
+                  : "Drop image here or click to browse"}
               </p>
               <p className="text-xs text-gray-500">
-                Supports PNG, JPG, JPEG (max 5MB)
+                Upload in WebP format for lighter Firebase storage usage
               </p>
             </div>
-            
+
             <Button
               type="button"
               variant="outline"
@@ -165,7 +189,7 @@ export function ImageUpload({
           </div>
         </div>
       )}
-      
+
       <input
         ref={fileInputRef}
         type="file"
