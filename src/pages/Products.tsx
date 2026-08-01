@@ -11,6 +11,7 @@ import {
   Gift,
   Package,
 } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { getCategories, Category } from "@/lib/firebaseService";
 import { logger } from "@/lib/logger";
 
@@ -62,7 +63,7 @@ const Products = () => {
   };
 
   // Icon mapping for categories
-  const categoryIconMap: { [key: string]: any } = {
+  const categoryIconMap: Record<string, LucideIcon> = {
     "IN-ROOM ACCESSORIES": BedDouble,
     "ROOM AMENITIES": BedDouble,
     "BATHROOM ACCESSORIES": Bath,

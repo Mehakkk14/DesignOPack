@@ -10,6 +10,30 @@ import { useToast } from "@/hooks/use-toast";
 import { Lock, Mail, Eye, EyeOff } from "lucide-react";
 import logo from "@/assets/designopack-logo-black.webp";
 
+type AuthError = {
+  code?: string;
+};
+
+const getAuthErrorMessage = (error: unknown, fallbackMessage: string) => {
+  if (typeof error === "object" && error !== null && "code" in error) {
+    const authError = error as AuthError;
+
+    if (authError.code === "auth/user-not-found") {
+      return "No account found with this email";
+    }
+
+    if (authError.code === "auth/wrong-password") {
+      return "Incorrect password";
+    }
+
+    if (authError.code === "auth/too-many-requests") {
+      return "Too many failed attempts. Please try again later";
+    }
+  }
+
+  return fallbackMessage;
+};
+
 const AdminLogin = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -61,16 +85,8 @@ const AdminLogin = () => {
       // Clear history and navigate to admin
       window.history.replaceState(null, '', '/admin');
       navigate("/admin", { replace: true });
-    } catch (error: any) {
-      let errorMessage = "Invalid email or password";
-      
-      if (error.code === "auth/user-not-found") {
-        errorMessage = "No account found with this email";
-      } else if (error.code === "auth/wrong-password") {
-        errorMessage = "Incorrect password";
-      } else if (error.code === "auth/too-many-requests") {
-        errorMessage = "Too many failed attempts. Please try again later";
-      }
+    } catch (error: unknown) {
+      const errorMessage = getAuthErrorMessage(error, "Invalid email or password");
 
       toast({
         title: "Login Failed",
@@ -100,14 +116,8 @@ const AdminLogin = () => {
         title: "Reset Email Sent! 📧",
         description: "Check your email for password reset instructions",
       });
-    } catch (error: any) {
-      let errorMessage = "Failed to send reset email";
-      
-      if (error.code === "auth/user-not-found") {
-        errorMessage = "No account found with this email address";
-      } else if (error.code === "auth/too-many-requests") {
-        errorMessage = "Too many requests. Please try again later";
-      }
+    } catch (error: unknown) {
+      const errorMessage = getAuthErrorMessage(error, "Failed to send reset email");
 
       toast({
         title: "Reset Failed",

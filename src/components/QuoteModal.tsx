@@ -21,6 +21,15 @@ interface QuoteModalProps {
   productName?: string;
 }
 
+interface QuoteFormData {
+  name: string;
+  email: string;
+  phone: string;
+  companyName: string;
+  product: string;
+  message: string;
+}
+
 const QuoteModal = ({ isOpen, onClose, productName = "" }: QuoteModalProps) => {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -33,7 +42,7 @@ const QuoteModal = ({ isOpen, onClose, productName = "" }: QuoteModalProps) => {
     message: "",
   });
 
-  const sendEmailNotification = async (quoteData: any) => {
+  const sendEmailNotification = async (quoteData: QuoteFormData) => {
     logger.emoji.loading('Sending email notification for quote request...');
     
     try {
@@ -81,7 +90,7 @@ const QuoteModal = ({ isOpen, onClose, productName = "" }: QuoteModalProps) => {
     }
   };
 
-  const sendEmailFallback = async (quoteData: any) => {
+  const sendEmailFallback = async (quoteData: QuoteFormData) => {
     logger.log('Using fallback email methods...');
     
     // Create comprehensive email content

@@ -11,6 +11,14 @@ import { useToast } from "@/hooks/use-toast";
 import { MapPin, Phone, Mail, Clock } from "lucide-react";
 import handshakeBanner from "@/assets/handshake-banner.jpg";
 
+interface ContactFormData {
+  name: string;
+  email: string;
+  phone: string;
+  companyName: string;
+  message: string;
+}
+
 const Contact = () => {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -22,7 +30,7 @@ const Contact = () => {
     message: "",
   });
 
-  const sendEmailFallback = async (contactData: any) => {
+  const sendEmailFallback = async (contactData: ContactFormData) => {
     const emailBody = `
 New Contact Form Submission from DesignOPack Website
 

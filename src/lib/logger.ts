@@ -45,7 +45,7 @@ export const logger = {
   /**
    * Log general information (development only)
    */
-  log: (...args: any[]): void => {
+  log: (...args: unknown[]): void => {
     if (isDevelopment) {
       console.log(`${colors.cyan}[INFO ${getTimestamp()}]${colors.reset}`, ...args);
     }
@@ -54,7 +54,7 @@ export const logger = {
   /**
    * Log errors (always logged, even in production for error tracking)
    */
-  error: (...args: any[]): void => {
+  error: (...args: unknown[]): void => {
     console.error(`${colors.red}[ERROR ${getTimestamp()}]${colors.reset}`, ...args);
     
     // In production, you might want to send to error tracking service
@@ -67,7 +67,7 @@ export const logger = {
   /**
    * Log warnings (development only)
    */
-  warn: (...args: any[]): void => {
+  warn: (...args: unknown[]): void => {
     if (isDevelopment) {
       console.warn(`${colors.yellow}[WARN ${getTimestamp()}]${colors.reset}`, ...args);
     }
@@ -76,7 +76,7 @@ export const logger = {
   /**
    * Log debug information (development only)
    */
-  debug: (...args: any[]): void => {
+  debug: (...args: unknown[]): void => {
     if (isDevelopment) {
       console.debug(`${colors.magenta}[DEBUG ${getTimestamp()}]${colors.reset}`, ...args);
     }
@@ -85,7 +85,7 @@ export const logger = {
   /**
    * Log success messages (development only)
    */
-  success: (...args: any[]): void => {
+  success: (...args: unknown[]): void => {
     if (isDevelopment) {
       console.log(`${colors.green}[SUCCESS ${getTimestamp()}]${colors.reset}`, ...args);
     }
@@ -112,7 +112,7 @@ export const logger = {
   /**
    * Log table data (development only)
    */
-  table: (data: any): void => {
+  table: (data: unknown): void => {
     if (isDevelopment) {
       console.table(data);
     }
@@ -122,22 +122,22 @@ export const logger = {
    * Log with emoji prefixes for better visibility (development only)
    */
   emoji: {
-    loading: (...args: any[]): void => {
+    loading: (...args: unknown[]): void => {
       if (isDevelopment) console.log('🔄', ...args);
     },
-    success: (...args: any[]): void => {
+    success: (...args: unknown[]): void => {
       if (isDevelopment) console.log('✅', ...args);
     },
-    error: (...args: any[]): void => {
+    error: (...args: unknown[]): void => {
       console.error('❌', ...args);
     },
-    warning: (...args: any[]): void => {
+    warning: (...args: unknown[]): void => {
       if (isDevelopment) console.warn('⚠️', ...args);
     },
-    info: (...args: any[]): void => {
+    info: (...args: unknown[]): void => {
       if (isDevelopment) console.log('ℹ️', ...args);
     },
-    search: (...args: any[]): void => {
+    search: (...args: unknown[]): void => {
       if (isDevelopment) console.log('🔍', ...args);
     },
   },
