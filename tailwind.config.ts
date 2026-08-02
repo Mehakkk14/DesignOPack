@@ -3,7 +3,12 @@ import tailwindcssAnimate from "tailwindcss-animate";
 
 export default {
   darkMode: ["class"],
-  content: ["./pages/**/*.{ts,tsx}", "./components/**/*.{ts,tsx}", "./app/**/*.{ts,tsx}", "./src/**/*.{ts,tsx}"],
+  content: [
+    "./pages/**/*.{ts,tsx}",
+    "./components/**/*.{ts,tsx}",
+    "./app/**/*.{ts,tsx}",
+    "./src/**/*.{ts,tsx}",
+  ],
   prefix: "",
   theme: {
     container: {
@@ -15,8 +20,8 @@ export default {
     },
     extend: {
       fontFamily: {
-        heading: ['Poppins', 'sans-serif'],
-        body: ['Open Sans', 'sans-serif'],
+        heading: ["Poppins", "sans-serif"],
+        body: ["Open Sans", "sans-serif"],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -63,11 +68,11 @@ export default {
           ring: "hsl(var(--sidebar-ring))",
         },
         // Custom luxury color palette
-        'soft-gray-light': '#F8F8F8',
-        'soft-gray-dark': '#EDEDED', 
-        'charcoal-black': '#121212',
-        'footer-text': '#CCCCCC',
-        'maroon': '#800000',
+        "soft-gray-light": "#F8F8F8",
+        "soft-gray-dark": "#EDEDED",
+        "charcoal-black": "#121212",
+        "footer-text": "#CCCCCC",
+        maroon: "#800000",
       },
       borderRadius: {
         lg: "var(--radius)",

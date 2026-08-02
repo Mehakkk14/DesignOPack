@@ -63,6 +63,42 @@ const createBlankFormData = (): ProductFormData => ({
   displayOrder: undefined,
 });
 
+const MAX_SAVE_IMAGE_DIMENSION = 960;
+const SAVE_WEBP_QUALITY = 0.7;
+
+const compressDataUrlImage = (imageUrl: string) => {
+  if (!imageUrl.startsWith("data:image/")) {
+    return Promise.resolve(imageUrl);
+  }
+
+  return new Promise<string>((resolve, reject) => {
+    const image = new Image();
+
+    image.onload = () => {
+      const canvas = document.createElement("canvas");
+      const scale = Math.min(
+        1,
+        MAX_SAVE_IMAGE_DIMENSION / Math.max(image.width, image.height),
+      );
+
+      canvas.width = Math.max(1, Math.round(image.width * scale));
+      canvas.height = Math.max(1, Math.round(image.height * scale));
+
+      const context = canvas.getContext("2d");
+      if (!context) {
+        reject(new Error("Unable to process image"));
+        return;
+      }
+
+      context.drawImage(image, 0, 0, canvas.width, canvas.height);
+      resolve(canvas.toDataURL("image/webp", SAVE_WEBP_QUALITY));
+    };
+
+    image.onerror = () => reject(new Error("Unable to load image"));
+    image.src = imageUrl;
+  });
+};
+
 const AdminProducts = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [products, setProducts] = useState<Product[]>([]);
@@ -240,12 +276,23 @@ const AdminProducts = () => {
     try {
       logger.emoji.loading("AdminProducts: Submitting product data:", formData);
 
-      const media = formData.media
-        .map((item) => ({
-          imageUrl: item.imageUrl.trim(),
-          description: item.description?.trim() || "",
-        }))
-        .filter((item) => item.imageUrl);
+      const media = (
+        await Promise.all(
+          formData.media.map(async (item) => {
+            const imageUrl = item.imageUrl.trim();
+            if (!imageUrl) {
+              return null;
+            }
+
+            return {
+              imageUrl: await compressDataUrlImage(imageUrl),
+              description: item.description?.trim() || "",
+            };
+          }),
+        )
+      ).filter(
+        (item): item is { imageUrl: string; description: string } => !!item,
+      );
 
       if (!formData.name || media.length === 0) {
         throw new Error("Missing required fields");

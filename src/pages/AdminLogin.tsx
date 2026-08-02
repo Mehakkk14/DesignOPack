@@ -1,11 +1,21 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { signInWithEmailAndPassword, onAuthStateChanged, sendPasswordResetEmail } from "firebase/auth";
+import {
+  signInWithEmailAndPassword,
+  onAuthStateChanged,
+  sendPasswordResetEmail,
+} from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { Lock, Mail, Eye, EyeOff } from "lucide-react";
 import logo from "@/assets/designopack-logo-black.webp";
@@ -49,7 +59,7 @@ const AdminLogin = () => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
         // Clear history and navigate to admin
-        window.history.replaceState(null, '', '/admin');
+        window.history.replaceState(null, "", "/admin");
         navigate("/admin", { replace: true });
       }
       setCheckingAuth(false);
@@ -62,14 +72,14 @@ const AdminLogin = () => {
   useEffect(() => {
     const handlePopState = (event: PopStateEvent) => {
       // If user tries to go back to admin pages without authentication
-      if (window.location.pathname.startsWith('/admin') && !auth.currentUser) {
-        window.history.replaceState(null, '', '/');
+      if (window.location.pathname.startsWith("/admin") && !auth.currentUser) {
+        window.history.replaceState(null, "", "/");
         navigate("/", { replace: true });
       }
     };
 
-    window.addEventListener('popstate', handlePopState);
-    return () => window.removeEventListener('popstate', handlePopState);
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
   }, [navigate]);
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -83,10 +93,13 @@ const AdminLogin = () => {
         description: "Logging you into the admin dashboard...",
       });
       // Clear history and navigate to admin
-      window.history.replaceState(null, '', '/admin');
+      window.history.replaceState(null, "", "/admin");
       navigate("/admin", { replace: true });
     } catch (error: unknown) {
-      const errorMessage = getAuthErrorMessage(error, "Invalid email or password");
+      const errorMessage = getAuthErrorMessage(
+        error,
+        "Invalid email or password",
+      );
 
       toast({
         title: "Login Failed",
@@ -117,7 +130,10 @@ const AdminLogin = () => {
         description: "Check your email for password reset instructions",
       });
     } catch (error: unknown) {
-      const errorMessage = getAuthErrorMessage(error, "Failed to send reset email");
+      const errorMessage = getAuthErrorMessage(
+        error,
+        "Failed to send reset email",
+      );
 
       toast({
         title: "Reset Failed",
@@ -152,9 +168,9 @@ const AdminLogin = () => {
         <CardHeader className="space-y-4 text-center pb-8">
           <div className="flex justify-center mb-2">
             <div className="bg-gradient-to-br from-gray-900 to-gray-700 p-4 rounded-2xl shadow-xl">
-              <img 
-                src={logo} 
-                alt="DesignOPack" 
+              <img
+                src={logo}
+                alt="DesignOPack"
                 className="h-16 w-auto filter brightness-0 invert"
               />
             </div>
@@ -166,7 +182,7 @@ const AdminLogin = () => {
             Sign in to access the DesignOPack dashboard
           </CardDescription>
         </CardHeader>
-        
+
         <CardContent>
           <form onSubmit={handleLogin} className="space-y-6">
             <div className="space-y-2">
@@ -174,7 +190,10 @@ const AdminLogin = () => {
                 Email Address
               </Label>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+                <Mail
+                  className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                  size={18}
+                />
                 <Input
                   id="email"
                   type="email"
@@ -193,7 +212,10 @@ const AdminLogin = () => {
                 Password
               </Label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+                <Lock
+                  className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                  size={18}
+                />
                 <Input
                   id="password"
                   type={showPassword ? "text" : "password"}
@@ -214,8 +236,8 @@ const AdminLogin = () => {
               </div>
             </div>
 
-            <Button 
-              type="submit" 
+            <Button
+              type="submit"
               className="w-full h-12 bg-gradient-to-r from-gray-900 to-gray-700 hover:from-gray-800 hover:to-gray-600 text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02]"
               disabled={loading}
             >

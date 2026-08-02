@@ -37,7 +37,7 @@ New Contact Form Submission from DesignOPack Website
 Name: ${contactData.name}
 Email: ${contactData.email}
 Phone: ${contactData.phone}
-Company: ${contactData.companyName || 'Not provided'}
+Company: ${contactData.companyName || "Not provided"}
 
 Message:
 ${contactData.message}
@@ -53,16 +53,26 @@ From: DesignOPack Website Contact Form
       const templateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID;
       const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
 
-      if (serviceId && templateId && publicKey && serviceId !== 'your_service_id') {
-        await emailjs.send(serviceId, templateId, {
-          from_name: contactData.name,
-          from_email: contactData.email,
-          phone: contactData.phone,
-          product: 'Contact Form',
-          message: contactData.message,
-          to_name: "DesignOPack Team",
-        }, publicKey);
-        
+      if (
+        serviceId &&
+        templateId &&
+        publicKey &&
+        serviceId !== "your_service_id"
+      ) {
+        await emailjs.send(
+          serviceId,
+          templateId,
+          {
+            from_name: contactData.name,
+            from_email: contactData.email,
+            phone: contactData.phone,
+            product: "Contact Form",
+            message: contactData.message,
+            to_name: "DesignOPack Team",
+          },
+          publicKey,
+        );
+
         logger.log("Contact email sent via EmailJS successfully");
         return true;
       }
@@ -72,20 +82,23 @@ From: DesignOPack Website Contact Form
 
     // Method 2: Try FormSubmit (no signup required)
     try {
-      const response = await fetch('https://formsubmit.co/rastogimehak3845@gmail.com', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
+      const response = await fetch(
+        "https://formsubmit.co/rastogimehak3845@gmail.com",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            name: contactData.name,
+            email: contactData.email,
+            phone: contactData.phone,
+            message: contactData.message,
+            _subject: `New Contact Form Submission from ${contactData.name}`,
+            _template: "table",
+          }),
         },
-        body: JSON.stringify({
-          name: contactData.name,
-          email: contactData.email,
-          phone: contactData.phone,
-          message: contactData.message,
-          _subject: `New Contact Form Submission from ${contactData.name}`,
-          _template: 'table',
-        }),
-      });
+      );
 
       if (response.ok) {
         logger.log("Contact email sent via FormSubmit successfully");
@@ -97,9 +110,9 @@ From: DesignOPack Website Contact Form
 
     // Method 3: Create mailto link as ultimate fallback
     const mailtoLink = `mailto:rastogimehak3845@gmail.com?subject=New Contact Form Submission from ${encodeURIComponent(contactData.name)}&body=${encodeURIComponent(emailBody)}`;
-    
+
     try {
-      window.open(mailtoLink, '_blank');
+      window.open(mailtoLink, "_blank");
       logger.log("Opened mailto link as fallback");
       return true;
     } catch (mailtoError) {
@@ -111,9 +124,14 @@ From: DesignOPack Website Contact Form
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Validate form data
-    if (!formData.name || !formData.email || !formData.phone || !formData.message) {
+    if (
+      !formData.name ||
+      !formData.email ||
+      !formData.phone ||
+      !formData.message
+    ) {
       toast({
         title: "Validation Error",
         description: "Please fill in all required fields.",
@@ -152,7 +170,10 @@ From: DesignOPack Website Contact Form
         throw new Error("Failed to save contact request");
       }
 
-      logger.emoji.loading("✅ Contact saved to Firebase successfully with ID:", firebaseResult.id);
+      logger.emoji.loading(
+        "✅ Contact saved to Firebase successfully with ID:",
+        firebaseResult.id,
+      );
 
       // Step 2: Send email notification
       const emailSent = await sendEmailFallback(formData);
@@ -161,12 +182,14 @@ From: DesignOPack Website Contact Form
         logger.emoji.loading("✅ Contact email sent successfully");
         toast({
           title: "Message Sent Successfully! ✅",
-          description: "Thank you for contacting us! We'll get back to you within 24 hours.",
+          description:
+            "Thank you for contacting us! We'll get back to you within 24 hours.",
         });
       } else {
         toast({
-          title: "Message Received! ✅", 
-          description: "Your message has been saved. Our team will contact you soon.",
+          title: "Message Received! ✅",
+          description:
+            "Your message has been saved. Our team will contact you soon.",
         });
       }
 
@@ -181,7 +204,8 @@ From: DesignOPack Website Contact Form
       logger.emoji.error("❌ Contact form submission error:", error);
       toast({
         title: "Submission Failed",
-        description: "Unable to send your message. Please try again or call us directly at +91-9868176361",
+        description:
+          "Unable to send your message. Please try again or call us directly at +91-9868176361",
         variant: "destructive",
       });
     } finally {
@@ -190,7 +214,7 @@ From: DesignOPack Website Contact Form
   };
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
     setFormData({
       ...formData,
@@ -203,15 +227,15 @@ From: DesignOPack Website Contact Form
       {/* Hero Section */}
       <section className="relative h-[40vh] flex items-center justify-center overflow-hidden">
         {/* Background Image */}
-        <div 
+        <div
           className="absolute inset-0 bg-cover bg-center"
           style={{
-            backgroundImage: `url(${handshakeBanner})`
+            backgroundImage: `url(${handshakeBanner})`,
           }}
         />
         {/* Overlay to align with brand palette */}
         <div className="absolute inset-0 bg-gradient-to-br from-black/60 via-secondary/70 to-black/60" />
-        
+
         <div className="container mx-auto px-4 relative z-10 text-center">
           <h1 className="text-4xl md:text-6xl font-heading font-bold text-white mb-4 animate-fade-in">
             Get in Touch
@@ -239,7 +263,8 @@ From: DesignOPack Website Contact Form
                         Office Address
                       </h3>
                       <p className="font-body text-muted-foreground text-sm">
-                        G-173, Dilshad Colony<br />
+                        G-173, Dilshad Colony
+                        <br />
                         Delhi 110095
                       </p>
                     </div>
@@ -258,8 +283,10 @@ From: DesignOPack Website Contact Form
                         Phone
                       </h3>
                       <p className="font-body text-muted-foreground text-sm">
-                        +91-9868176361<br />
-                        +91-8595555488<br />
+                        +91-9868176361
+                        <br />
+                        +91-8595555488
+                        <br />
                         +91-9910211189
                       </p>
                     </div>
@@ -296,7 +323,8 @@ From: DesignOPack Website Contact Form
                         Business Hours
                       </h3>
                       <p className="font-body text-muted-foreground text-sm">
-                        Monday - Saturday<br />
+                        Monday - Saturday
+                        <br />
                         9:00 AM - 6:00 PM
                       </p>
                     </div>
@@ -313,7 +341,8 @@ From: DesignOPack Website Contact Form
                     Send us a Message
                   </h2>
                   <p className="text-muted-foreground font-body mb-8">
-                    Fill out the form below and our team will reach out to you shortly.
+                    Fill out the form below and our team will reach out to you
+                    shortly.
                   </p>
 
                   <form onSubmit={handleSubmit} className="space-y-6">
@@ -397,8 +426,8 @@ From: DesignOPack Website Contact Form
                       />
                     </div>
 
-                    <Button 
-                      type="submit" 
+                    <Button
+                      type="submit"
                       size="lg"
                       className="w-full md:w-auto"
                       disabled={isSubmitting}

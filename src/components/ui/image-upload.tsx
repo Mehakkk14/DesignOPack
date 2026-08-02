@@ -1,9 +1,13 @@
 import React, { useState, useRef } from "react";
+import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Upload, X, ImageIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { logger } from "@/lib/logger";
+
+const MAX_IMAGE_DIMENSION = 960;
+const WEBP_QUALITY = 0.7;
 
 interface ImageUploadProps {
   value?: string;
@@ -27,6 +31,10 @@ export function ImageUpload({
   const [preview, setPreview] = useState<string>(value || "");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  useEffect(() => {
+    setPreview(value || "");
+  }, [value]);
+
   const convertFileToWebp = (file: File) => {
     return new Promise<string>((resolve, reject) => {
       const reader = new FileReader();
@@ -36,8 +44,12 @@ export function ImageUpload({
 
         image.onload = () => {
           const canvas = document.createElement("canvas");
-          canvas.width = image.width;
-          canvas.height = image.height;
+          const scale = Math.min(
+            1,
+            MAX_IMAGE_DIMENSION / Math.max(image.width, image.height),
+          );
+          canvas.width = Math.max(1, Math.round(image.width * scale));
+          canvas.height = Math.max(1, Math.round(image.height * scale));
 
           const context = canvas.getContext("2d");
           if (!context) {
@@ -46,7 +58,7 @@ export function ImageUpload({
           }
 
           context.drawImage(image, 0, 0);
-          resolve(canvas.toDataURL("image/webp", 0.82));
+          resolve(canvas.toDataURL("image/webp", WEBP_QUALITY));
         };
 
         image.onerror = () => reject(new Error("Unable to load image"));

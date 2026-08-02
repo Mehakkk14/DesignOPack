@@ -1,11 +1,11 @@
 /**
  * Development Logger Utility
- * 
+ *
  * This utility provides logging functionality that is:
  * - Only active in development mode
  * - Removed/disabled in production builds
  * - Maintains consistent logging format
- * 
+ *
  * Usage:
  *   import { logger } from '@/lib/logger';
  *   logger.log('Info message');
@@ -19,22 +19,22 @@ const isProduction = import.meta.env.PROD;
 
 // ANSI color codes for terminal output
 const colors = {
-  reset: '\x1b[0m',
-  bright: '\x1b[1m',
-  dim: '\x1b[2m',
-  red: '\x1b[31m',
-  green: '\x1b[32m',
-  yellow: '\x1b[33m',
-  blue: '\x1b[34m',
-  magenta: '\x1b[35m',
-  cyan: '\x1b[36m',
+  reset: "\x1b[0m",
+  bright: "\x1b[1m",
+  dim: "\x1b[2m",
+  red: "\x1b[31m",
+  green: "\x1b[32m",
+  yellow: "\x1b[33m",
+  blue: "\x1b[34m",
+  magenta: "\x1b[35m",
+  cyan: "\x1b[36m",
 };
 
 /**
  * Format timestamp for logs
  */
 const getTimestamp = (): string => {
-  return new Date().toISOString().split('T')[1].split('.')[0];
+  return new Date().toISOString().split("T")[1].split(".")[0];
 };
 
 /**
@@ -47,7 +47,10 @@ export const logger = {
    */
   log: (...args: unknown[]): void => {
     if (isDevelopment) {
-      console.log(`${colors.cyan}[INFO ${getTimestamp()}]${colors.reset}`, ...args);
+      console.log(
+        `${colors.cyan}[INFO ${getTimestamp()}]${colors.reset}`,
+        ...args,
+      );
     }
   },
 
@@ -55,8 +58,11 @@ export const logger = {
    * Log errors (always logged, even in production for error tracking)
    */
   error: (...args: unknown[]): void => {
-    console.error(`${colors.red}[ERROR ${getTimestamp()}]${colors.reset}`, ...args);
-    
+    console.error(
+      `${colors.red}[ERROR ${getTimestamp()}]${colors.reset}`,
+      ...args,
+    );
+
     // In production, you might want to send to error tracking service
     if (isProduction) {
       // TODO: Send to Sentry, LogRocket, or other error tracking service
@@ -69,7 +75,10 @@ export const logger = {
    */
   warn: (...args: unknown[]): void => {
     if (isDevelopment) {
-      console.warn(`${colors.yellow}[WARN ${getTimestamp()}]${colors.reset}`, ...args);
+      console.warn(
+        `${colors.yellow}[WARN ${getTimestamp()}]${colors.reset}`,
+        ...args,
+      );
     }
   },
 
@@ -78,7 +87,10 @@ export const logger = {
    */
   debug: (...args: unknown[]): void => {
     if (isDevelopment) {
-      console.debug(`${colors.magenta}[DEBUG ${getTimestamp()}]${colors.reset}`, ...args);
+      console.debug(
+        `${colors.magenta}[DEBUG ${getTimestamp()}]${colors.reset}`,
+        ...args,
+      );
     }
   },
 
@@ -87,7 +99,10 @@ export const logger = {
    */
   success: (...args: unknown[]): void => {
     if (isDevelopment) {
-      console.log(`${colors.green}[SUCCESS ${getTimestamp()}]${colors.reset}`, ...args);
+      console.log(
+        `${colors.green}[SUCCESS ${getTimestamp()}]${colors.reset}`,
+        ...args,
+      );
     }
   },
 
@@ -123,22 +138,22 @@ export const logger = {
    */
   emoji: {
     loading: (...args: unknown[]): void => {
-      if (isDevelopment) console.log('🔄', ...args);
+      if (isDevelopment) console.log("🔄", ...args);
     },
     success: (...args: unknown[]): void => {
-      if (isDevelopment) console.log('✅', ...args);
+      if (isDevelopment) console.log("✅", ...args);
     },
     error: (...args: unknown[]): void => {
-      console.error('❌', ...args);
+      console.error("❌", ...args);
     },
     warning: (...args: unknown[]): void => {
-      if (isDevelopment) console.warn('⚠️', ...args);
+      if (isDevelopment) console.warn("⚠️", ...args);
     },
     info: (...args: unknown[]): void => {
-      if (isDevelopment) console.log('ℹ️', ...args);
+      if (isDevelopment) console.log("ℹ️", ...args);
     },
     search: (...args: unknown[]): void => {
-      if (isDevelopment) console.log('🔍', ...args);
+      if (isDevelopment) console.log("🔍", ...args);
     },
   },
 };

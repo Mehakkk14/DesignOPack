@@ -43,8 +43,8 @@ const QuoteModal = ({ isOpen, onClose, productName = "" }: QuoteModalProps) => {
   });
 
   const sendEmailNotification = async (quoteData: QuoteFormData) => {
-    logger.emoji.loading('Sending email notification for quote request...');
-    
+    logger.emoji.loading("Sending email notification for quote request...");
+
     try {
       // Get EmailJS configuration from environment variables
       const serviceId = import.meta.env.VITE_EMAILJS_SERVICE_ID;
@@ -52,11 +52,15 @@ const QuoteModal = ({ isOpen, onClose, productName = "" }: QuoteModalProps) => {
       const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
 
       // Check if EmailJS is properly configured
-      if (!serviceId || !templateId || !publicKey || 
-          serviceId === 'your_service_id' || 
-          templateId === 'your_template_id' || 
-          publicKey === 'your_public_key') {
-        logger.warn('EmailJS not configured properly, using fallback methods');
+      if (
+        !serviceId ||
+        !templateId ||
+        !publicKey ||
+        serviceId === "your_service_id" ||
+        templateId === "your_template_id" ||
+        publicKey === "your_public_key"
+      ) {
+        logger.warn("EmailJS not configured properly, using fallback methods");
         return await sendEmailFallback(quoteData);
       }
 
@@ -65,34 +69,39 @@ const QuoteModal = ({ isOpen, onClose, productName = "" }: QuoteModalProps) => {
         customer_name: quoteData.name,
         customer_email: quoteData.email,
         customer_phone: quoteData.phone,
-        customer_company: quoteData.companyName || 'Not provided',
-        product_name: quoteData.product || 'General Inquiry',
-        product_category: 'N/A',
-        quantity: 'To be discussed',
-        message: quoteData.message
+        customer_company: quoteData.companyName || "Not provided",
+        product_name: quoteData.product || "General Inquiry",
+        product_category: "N/A",
+        quantity: "To be discussed",
+        message: quoteData.message,
       };
 
-      logger.log('Sending email via EmailJS with params:', templateParams);
+      logger.log("Sending email via EmailJS with params:", templateParams);
 
       // Send email using EmailJS
-      const response = await emailjs.send(serviceId, templateId, templateParams, publicKey);
-      
+      const response = await emailjs.send(
+        serviceId,
+        templateId,
+        templateParams,
+        publicKey,
+      );
+
       if (response.status === 200) {
-        logger.emoji.success('Email sent successfully via EmailJS');
+        logger.emoji.success("Email sent successfully via EmailJS");
         return true;
       } else {
-        logger.error('EmailJS returned non-200 status:', response);
+        logger.error("EmailJS returned non-200 status:", response);
         return await sendEmailFallback(quoteData);
       }
     } catch (emailError) {
-      logger.error('EmailJS failed:', emailError);
+      logger.error("EmailJS failed:", emailError);
       return await sendEmailFallback(quoteData);
     }
   };
 
   const sendEmailFallback = async (quoteData: QuoteFormData) => {
-    logger.log('Using fallback email methods...');
-    
+    logger.log("Using fallback email methods...");
+
     // Create comprehensive email content
     const emailSubject = `New Quote Request from ${quoteData.name} - DesignOPack`;
     const emailBody = `
@@ -102,14 +111,14 @@ Customer Details:
 Name: ${quoteData.name}
 Email: ${quoteData.email}
 Phone: ${quoteData.phone}
-Company: ${quoteData.companyName || 'Not provided'}
-Product Interest: ${quoteData.product || 'General Inquiry'}
+Company: ${quoteData.companyName || "Not provided"}
+Product Interest: ${quoteData.product || "General Inquiry"}
 
 Message:
 ${quoteData.message}
 
 ---
-Submitted on: ${new Date().toLocaleString('en-US', { timeZone: 'Asia/Kolkata' })}
+Submitted on: ${new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" })}
 Source: DesignOPack Website Quote Form
 
 Please follow up with the customer within 24 hours.
@@ -117,39 +126,42 @@ Please follow up with the customer within 24 hours.
 
     // Method 1: Try FormSubmit (reliable free service)
     try {
-      const formSubmitResponse = await fetch('https://formsubmit.co/designopackindia@gmail.com', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: quoteData.name,
-          email: quoteData.email,
-          phone: quoteData.phone,
-          company: quoteData.companyName || 'Not provided',
-          product: quoteData.product || 'General Inquiry',
-          message: quoteData.message,
-          _subject: emailSubject,
-          _template: 'table',
-          _next: 'https://designopack.com/thank-you',
-        }),
-      });
+      const formSubmitResponse = await fetch(
+        "https://formsubmit.co/designopackindia@gmail.com",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: quoteData.name,
+            email: quoteData.email,
+            phone: quoteData.phone,
+            company: quoteData.companyName || "Not provided",
+            product: quoteData.product || "General Inquiry",
+            message: quoteData.message,
+            _subject: emailSubject,
+            _template: "table",
+            _next: "https://designopack.com/thank-you",
+          }),
+        },
+      );
 
       if (formSubmitResponse.ok) {
-        logger.success('Email sent via FormSubmit successfully');
+        logger.success("Email sent via FormSubmit successfully");
         return true;
       }
     } catch (formSubmitError) {
-      logger.warn('FormSubmit failed:', formSubmitError);
+      logger.warn("FormSubmit failed:", formSubmitError);
     }
 
     // Method 3: Create mailto link as ultimate fallback
     const mailtoLink = `mailto:designopackindia@gmail.com?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`;
-    
+
     try {
-      window.open(mailtoLink, '_blank');
-      logger.log('Opened email client for user to send');
+      window.open(mailtoLink, "_blank");
+      logger.log("Opened email client for user to send");
       return true;
     } catch (mailtoError) {
-      logger.warn('Mailto failed:', mailtoError);
+      logger.warn("Mailto failed:", mailtoError);
     }
 
     return false;
@@ -157,12 +169,13 @@ Please follow up with the customer within 24 hours.
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Validate form data
     if (!formData.name || !formData.email || !formData.message) {
       toast({
         title: "Validation Error",
-        description: "Please fill in all required fields (Name, Email, Message).",
+        description:
+          "Please fill in all required fields (Name, Email, Message).",
         variant: "destructive",
       });
       return;
@@ -183,7 +196,7 @@ Please follow up with the customer within 24 hours.
 
     try {
       logger.emoji.loading("Submitting quote request:", formData);
-      
+
       // Step 1: Save to Firebase first
       const firebaseResult = await addQuoteRequest({
         name: formData.name,
@@ -199,11 +212,14 @@ Please follow up with the customer within 24 hours.
         throw new Error("Failed to save quote request");
       }
 
-      logger.emoji.success("Quote saved to Firebase successfully with ID:", firebaseResult.id);
+      logger.emoji.success(
+        "Quote saved to Firebase successfully with ID:",
+        firebaseResult.id,
+      );
 
-      // Step 2: Send email notification  
+      // Step 2: Send email notification
       const emailSent = await sendEmailNotification(formData);
-      
+
       if (emailSent) {
         logger.emoji.success("Email notification sent successfully");
       } else {
@@ -213,7 +229,7 @@ Please follow up with the customer within 24 hours.
       // Step 3: Show success message
       toast({
         title: "Quote Request Submitted Successfully! ✅",
-        description: emailSent 
+        description: emailSent
           ? "Thank you! Your request has been received and our team has been notified. We'll contact you within 24 hours."
           : "Thank you! Your request has been saved. We'll contact you within 24 hours via email or phone.",
       });
@@ -228,12 +244,12 @@ Please follow up with the customer within 24 hours.
         message: "",
       });
       onClose();
-
     } catch (error) {
       logger.error("Quote submission error:", error);
       toast({
         title: "Submission Failed",
-        description: "Unable to submit your request. Please try again or call us directly at +91-9868176361",
+        description:
+          "Unable to submit your request. Please try again or call us directly at +91-9868176361",
         variant: "destructive",
       });
     } finally {
@@ -242,7 +258,7 @@ Please follow up with the customer within 24 hours.
   };
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
     setFormData({
       ...formData,
@@ -361,11 +377,7 @@ Please follow up with the customer within 24 hours.
             >
               Cancel
             </Button>
-            <Button 
-              type="submit" 
-              className="flex-1"
-              disabled={isSubmitting}
-            >
+            <Button type="submit" className="flex-1" disabled={isSubmitting}>
               {isSubmitting ? "Submitting..." : "Submit Request"}
             </Button>
           </div>
