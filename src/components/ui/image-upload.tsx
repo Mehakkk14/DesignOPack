@@ -57,7 +57,7 @@ export function ImageUpload({
             return;
           }
 
-          context.drawImage(image, 0, 0);
+          context.drawImage(image, 0, 0, canvas.width, canvas.height);
           resolve(canvas.toDataURL("image/webp", WEBP_QUALITY));
         };
 
@@ -133,11 +133,11 @@ export function ImageUpload({
 
       {preview ? (
         <div className="relative">
-          <div className="relative w-full h-48 rounded-lg overflow-hidden border border-gray-200">
+          <div className="relative w-full h-48 rounded-lg overflow-hidden border border-gray-200 bg-white">
             <img
               src={preview}
               alt="Preview"
-              className="w-full h-full object-cover"
+              className="w-full h-full object-contain"
             />
             <Button
               type="button"

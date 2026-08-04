@@ -103,29 +103,28 @@ const ProductDetailsModal = ({
                 <div
                   ref={trackRef}
                   onScroll={handleScroll}
-                  className="flex w-full overflow-x-auto scroll-smooth snap-x snap-mandatory rounded-xl bg-muted scrollbar-hide"
-                  style={{ WebkitOverflowScrolling: "touch" }}
+                  className="flex w-full overflow-x-auto scroll-smooth snap-x snap-mandatory scrollbar-hide"
+                  style={{ WebkitOverflowScrolling: "touch", height: "60vh" }}
                 >
                   {productMedia.map((mediaItem, index) => (
                     <div
                       key={index}
-                      className="w-full flex-shrink-0 snap-center px-3 py-4"
-                      style={{ minWidth: "100%" }}
+                      className="relative flex-shrink-0 snap-center bg-gray-50"
+                      style={{ minWidth: "100%", width: "100%", height: "100%" }}
                     >
-                      <div className="flex h-[440px] items-center justify-center overflow-hidden rounded-lg bg-white md:h-[520px] lg:h-[560px]">
-                        <img
-                          src={mediaItem.imageUrl}
-                          alt={`${productName} - View ${index + 1}`}
-                          loading="lazy"
-                          decoding="async"
-                          className="max-h-full max-w-full object-contain"
-                        />
-                      </div>
-                      {mediaItem.description ? (
-                        <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
-                          {mediaItem.description}
-                        </p>
-                      ) : null}
+                      <img
+                        src={mediaItem.imageUrl}
+                        alt={`${productName} - View ${index + 1}`}
+                        loading="lazy"
+                        decoding="async"
+                        style={{
+                          position: "absolute",
+                          inset: 0,
+                          width: "100%",
+                          height: "100%",
+                          objectFit: "contain",
+                        }}
+                      />
                     </div>
                   ))}
                 </div>
@@ -160,11 +159,10 @@ const ProductDetailsModal = ({
                       type="button"
                       onClick={() => scrollToImage(index)}
                       aria-label={`View image ${index + 1}`}
-                      className={`h-2 w-2 rounded-full transition-all ${
-                        selectedImageIndex === index
+                      className={`h-2 w-2 rounded-full transition-all ${selectedImageIndex === index
                           ? "bg-muted-foreground/70"
                           : "bg-muted-foreground/25 hover:bg-muted-foreground/45"
-                      }`}
+                        }`}
                     />
                   ))}
                 </div>
