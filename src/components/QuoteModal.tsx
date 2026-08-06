@@ -1,5 +1,4 @@
-import { useState } from "react";
-import emailjs from "@emailjs/browser";
+import { useState, memo } from "react";
 import { addQuoteRequest } from "@/lib/firebaseService";
 import { logger } from "@/lib/logger";
 import {
@@ -30,7 +29,7 @@ interface QuoteFormData {
   message: string;
 }
 
-const QuoteModal = ({ isOpen, onClose, productName = "" }: QuoteModalProps) => {
+const QuoteModal = memo(({ isOpen, onClose, productName = "" }: QuoteModalProps) => {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
@@ -60,9 +59,13 @@ const QuoteModal = ({ isOpen, onClose, productName = "" }: QuoteModalProps) => {
         templateId === "your_template_id" ||
         publicKey === "your_public_key"
       ) {
-        logger.warn("EmailJS not configured properly, using fallback methods");
+        logger.emoji.error(
+          "⚠️ EmailJS configuration missing or using default placeholders",
+        );
         return await sendEmailFallback(quoteData);
       }
+
+      const { default: emailjs } = await import("@emailjs/browser");
 
       // Prepare email template parameters matching client's template variables
       const templateParams = {
@@ -385,6 +388,6 @@ Please follow up with the customer within 24 hours.
       </DialogContent>
     </Dialog>
   );
-};
+});
 
 export default QuoteModal;

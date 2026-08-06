@@ -1,28 +1,31 @@
+import { lazy, Suspense } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+
+// Statically load Home page for instant initial paint
 import Home from "./pages/Home";
-import About from "./pages/About";
-import Products from "./pages/Products";
-import ProductCategory from "./pages/ProductCategory";
-import Contact from "./pages/Contact";
-import Admin from "./pages/Admin";
-import AdminLogin from "./pages/AdminLogin";
-import AdminProducts from "./pages/AdminProducts";
-import AdminCategories from "./pages/AdminCategories";
-import AdminQuotes from "./pages/AdminQuotes";
-import AdminBanners from "./pages/AdminBanners";
-import NotFound from "./pages/NotFound";
+
+// Lazy load secondary customer pages & heavy admin routes
+const About = lazy(() => import("./pages/About"));
+const Products = lazy(() => import("./pages/Products"));
+const ProductCategory = lazy(() => import("./pages/ProductCategory"));
+const Contact = lazy(() => import("./pages/Contact"));
+const Admin = lazy(() => import("./pages/Admin"));
+const AdminLogin = lazy(() => import("./pages/AdminLogin"));
+const AdminProducts = lazy(() => import("./pages/AdminProducts"));
+const AdminCategories = lazy(() => import("./pages/AdminCategories"));
+const AdminQuotes = lazy(() => import("./pages/AdminQuotes"));
+const AdminBanners = lazy(() => import("./pages/AdminBanners"));
+const NotFound = lazy(() => import("./pages/NotFound"));
+
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import WhatsAppButton from "./components/WhatsAppButton";
 import ScrollToTop from "./components/ScrollToTop";
 import ProtectedRoute from "./components/ProtectedRoute";
 import PageLoader from "./components/PageLoader";
-
-const queryClient = new QueryClient();
 
 const AppContent = () => {
   const location = useLocation();
@@ -32,21 +35,23 @@ const AppContent = () => {
     <>
       <ScrollToTop />
       {!isAdminRoute && <Navbar />}
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/about" element={<About />} />
-        <Route path="/products" element={<Products />} />
-        <Route path="/products/:categoryName" element={<ProductCategory />} />
-        <Route path="/contact" element={<Contact />} />
-        <Route path="/admin/login" element={<AdminLogin />} />
-        <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
-        <Route path="/admin/banners" element={<ProtectedRoute><AdminBanners /></ProtectedRoute>} />
-        <Route path="/admin/products" element={<ProtectedRoute><AdminProducts /></ProtectedRoute>} />
-        <Route path="/admin/categories" element={<ProtectedRoute><AdminCategories /></ProtectedRoute>} />
-        <Route path="/admin/quotes" element={<ProtectedRoute><AdminQuotes /></ProtectedRoute>} />
-        {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-        <Route path="*" element={<NotFound />} />
-      </Routes>
+      <Suspense fallback={null}>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/products" element={<Products />} />
+          <Route path="/products/:categoryName" element={<ProductCategory />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/admin/login" element={<AdminLogin />} />
+          <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
+          <Route path="/admin/banners" element={<ProtectedRoute><AdminBanners /></ProtectedRoute>} />
+          <Route path="/admin/products" element={<ProtectedRoute><AdminProducts /></ProtectedRoute>} />
+          <Route path="/admin/categories" element={<ProtectedRoute><AdminCategories /></ProtectedRoute>} />
+          <Route path="/admin/quotes" element={<ProtectedRoute><AdminQuotes /></ProtectedRoute>} />
+          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </Suspense>
       {!isAdminRoute && <Footer />}
       {!isAdminRoute && <WhatsAppButton />}
     </>
@@ -54,16 +59,14 @@ const AppContent = () => {
 };
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <PageLoader />
-        <AppContent />
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
+  <TooltipProvider>
+    <Toaster />
+    <Sonner />
+    <BrowserRouter>
+      <PageLoader />
+      <AppContent />
+    </BrowserRouter>
+  </TooltipProvider>
 );
 
 export default App;

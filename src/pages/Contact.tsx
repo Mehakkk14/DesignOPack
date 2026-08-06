@@ -1,5 +1,4 @@
 import { useState } from "react";
-import emailjs from "@emailjs/browser";
 import { addQuoteRequest } from "@/lib/firebaseService";
 import { logger } from "@/lib/logger";
 import { Card, CardContent } from "@/components/ui/card";
@@ -59,6 +58,7 @@ From: DesignOPack Website Contact Form
         publicKey &&
         serviceId !== "your_service_id"
       ) {
+        const { default: emailjs } = await import("@emailjs/browser");
         await emailjs.send(
           serviceId,
           templateId,

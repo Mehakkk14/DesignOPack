@@ -51,22 +51,6 @@ All colors MUST be HSL.
     /* Transitions */
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     --transition-elegant: all 0.5s cubic-bezier(0.22, 1, 0.36, 1);
-
-    --sidebar-background: 0 0% 98%;
-
-    --sidebar-foreground: 240 5.3% 26.1%;
-
-    --sidebar-primary: 240 5.9% 10%;
-
-    --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
   }
 
   .dark {
@@ -206,17 +190,16 @@ All colors MUST be HSL.
 
 /* Performance Optimizations */
 @layer base {
-  /* Optimize image rendering */
-  img {
-    content-visibility: auto;
-  }
-
-  /* GPU acceleration for animations */
+  /* Promote animated elements to GPU layers only when animating */
   .animate-fade-in,
   .animate-slide-up,
-  .animate-scale-in,
+  .animate-scale-in {
+    will-change: opacity, transform;
+    animation-fill-mode: both;
+  }
+
   .hover-lift {
-    will-change: transform, opacity;
+    transition: var(--transition-smooth);
   }
 
   /* Optimize font rendering */
@@ -224,5 +207,17 @@ All colors MUST be HSL.
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
+  }
+}
+
+/* Accessibility: Respect prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }

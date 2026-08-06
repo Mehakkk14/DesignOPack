@@ -71,6 +71,15 @@ const quotesCollection = "quotes";
 const bannersCollection = "banners";
 const categoriesCollection = "categories";
 
+// In-Memory Caches
+let productsCache: Product[] | null = null;
+let categoriesCache: Category[] | null = null;
+let bannersCache: Banner[] | null = null;
+
+export const clearProductsCache = () => { productsCache = null; };
+export const clearCategoriesCache = () => { categoriesCache = null; };
+export const clearBannersCache = () => { bannersCache = null; };
+
 export const getProductMedia = (product: Product): ProductImage[] => {
   if (product.media && product.media.length > 0) {
     return product.media.filter((media) => media.imageUrl);
@@ -110,6 +119,8 @@ export const addProduct = async (product: Product) => {
       createdAt: Timestamp.now(),
       updatedAt: Timestamp.now(),
     });
+    // Invalidate Cache
+    clearProductsCache();
     logger.emoji.success("Product added successfully with ID:", docRef.id);
     return { success: true, id: docRef.id };
   } catch (error) {
@@ -120,6 +131,11 @@ export const addProduct = async (product: Product) => {
 
 export const getProducts = async () => {
   try {
+    if (productsCache !== null) {
+      logger.emoji.success(`Successfully loaded ${productsCache.length} products (from Cache)`);
+      return { success: true, products: productsCache };
+    }
+
     logger.emoji.search("Fetching products from Firestore...");
     // Fetch all products without Firestore ordering (we'll sort in memory)
     const querySnapshot = await getDocs(collection(db, productsCollection));
@@ -153,6 +169,9 @@ export const getProducts = async () => {
       const timeB = b.createdAt?.getTime() || 0;
       return timeA - timeB;
     });
+
+    // Store in cache
+    productsCache = products;
 
     logger.emoji.success(
       `Successfully loaded ${products.length} products (sorted by category → timestamp)`,
@@ -204,6 +223,8 @@ export const updateProduct = async (id: string, updates: Partial<Product>) => {
       ...cleanUpdates,
       updatedAt: Timestamp.now(),
     });
+    // Invalidate Cache
+    clearProductsCache();
     logger.emoji.success("Product updated successfully");
     return { success: true };
   } catch (error) {
@@ -215,6 +236,8 @@ export const updateProduct = async (id: string, updates: Partial<Product>) => {
 export const deleteProduct = async (id: string) => {
   try {
     await deleteDoc(doc(db, productsCollection, id));
+    // Invalidate Cache
+    clearProductsCache();
     return { success: true };
   } catch (error) {
     logger.error("Error deleting product:", error);
@@ -385,6 +408,8 @@ export const addBanner = async (
       createdAt: Timestamp.now(),
       updatedAt: Timestamp.now(),
     });
+    // Invalidate Cache
+    clearBannersCache();
     logger.emoji.success("Banner added successfully with ID:", docRef.id);
     return { success: true, id: docRef.id };
   } catch (error) {
@@ -395,6 +420,11 @@ export const addBanner = async (
 
 export const getBanners = async () => {
   try {
+    if (bannersCache !== null) {
+      logger.log(`Successfully loaded ${bannersCache.length} banners (from Cache)`);
+      return { success: true, banners: bannersCache };
+    }
+
     logger.log("Fetching banners from Firestore...");
     const q = query(collection(db, bannersCollection), orderBy("order", "asc"));
     const querySnapshot = await getDocs(q);
@@ -408,6 +438,9 @@ export const getBanners = async () => {
         updatedAt: doc.data().updatedAt?.toDate(),
       } as Banner);
     });
+
+    // Store in Cache
+    bannersCache = banners;
 
     logger.log(`Successfully loaded ${banners.length} banners:`, banners);
     return { success: true, banners };
@@ -424,6 +457,8 @@ export const updateBanner = async (id: string, updates: Partial<Banner>) => {
       ...updates,
       updatedAt: Timestamp.now(),
     });
+    // Invalidate Cache
+    clearBannersCache();
     return { success: true };
   } catch (error) {
     logger.error("Error updating banner:", error);
@@ -434,6 +469,8 @@ export const updateBanner = async (id: string, updates: Partial<Banner>) => {
 export const deleteBanner = async (id: string) => {
   try {
     await deleteDoc(doc(db, bannersCollection, id));
+    // Invalidate Cache
+    clearBannersCache();
     return { success: true };
   } catch (error) {
     logger.error("Error deleting banner:", error);
@@ -518,6 +555,11 @@ export const initializeDefaultBanners = async () => {
 
 export const getCategories = async () => {
   try {
+    if (categoriesCache !== null) {
+      logger.log(`Successfully loaded ${categoriesCache.length} categories (from Cache)`);
+      return { success: true, categories: categoriesCache };
+    }
+
     logger.log("Fetching categories from Firestore...");
     const q = query(
       collection(db, categoriesCollection),
@@ -534,6 +576,9 @@ export const getCategories = async () => {
         updatedAt: doc.data().updatedAt?.toDate(),
       } as Category);
     });
+
+    // Store in Cache
+    categoriesCache = categories;
 
     logger.log(
       `Successfully loaded ${categories.length} categories:`,
@@ -556,6 +601,8 @@ export const addCategory = async (
       createdAt: Timestamp.now(),
       updatedAt: Timestamp.now(),
     });
+    // Invalidate Cache
+    clearCategoriesCache();
     logger.emoji.success("Category added successfully with ID:", docRef.id);
     return { success: true, id: docRef.id };
   } catch (error) {
@@ -581,6 +628,8 @@ export const updateCategory = async (
       ...cleanUpdates,
       updatedAt: Timestamp.now(),
     });
+    // Invalidate Cache
+    clearCategoriesCache();
     logger.emoji.success("Category updated successfully");
     return { success: true };
   } catch (error) {
@@ -593,6 +642,8 @@ export const deleteCategory = async (id: string) => {
   try {
     logger.emoji.loading("Deleting category:", id);
     await deleteDoc(doc(db, categoriesCollection, id));
+    // Invalidate Cache
+    clearCategoriesCache();
     logger.emoji.success("Category deleted successfully");
     return { success: true };
   } catch (error) {

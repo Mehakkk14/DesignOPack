@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, memo } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Menu, X, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -6,7 +6,7 @@ import { auth } from "@/lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import logo from "@/assets/designopack-logo-transparent.png";
 
-const Navbar = () => {
+const Navbar = memo(() => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -16,7 +16,7 @@ const Navbar = () => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 20);
     };
-    window.addEventListener("scroll", handleScroll);
+    window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
@@ -93,6 +93,8 @@ const Navbar = () => {
           <button
             className="md:hidden text-foreground"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            aria-label={isMobileMenuOpen ? "Close navigation menu" : "Open navigation menu"}
+            aria-expanded={isMobileMenuOpen}
           >
             {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
@@ -119,7 +121,7 @@ const Navbar = () => {
               </Link>
             </Button>
             <Button variant="outline" size="sm" className="w-full mt-2 border-primary text-primary" asChild>
-              <Link to={isAdmin ? "/admin" : "/admin/login"} onClick={() => setIsMobileMenuOpen(false)} className="flex items-center justify-center" title="Admin">
+              <Link to={isAdmin ? "/admin" : "/admin/login"} onClick={() => setIsMobileMenuOpen(false)} className="flex items-center justify-center" aria-label="Admin panel">
                 <Shield size={16} />
               </Link>
             </Button>
@@ -128,6 +130,6 @@ const Navbar = () => {
       </div>
     </nav>
   );
-};
+});
 
 export default Navbar;

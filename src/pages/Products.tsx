@@ -179,6 +179,8 @@ const Products = () => {
                             alt={category.name}
                             loading="lazy"
                             decoding="async"
+                            width={600}
+                            height={224}
                             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                             onError={(e) => {
                               const target = e.target as HTMLImageElement;

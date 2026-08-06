@@ -170,6 +170,8 @@ const ProductCategory = () => {
                       alt={product.name}
                       loading="lazy"
                       decoding="async"
+                      width={400}
+                      height={240}
                       className="max-w-full max-h-full object-contain transition-transform duration-500 group-hover:scale-105"
                       onError={(e) => {
                         const target = e.target as HTMLImageElement;

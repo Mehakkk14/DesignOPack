@@ -6,7 +6,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, memo } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import QuoteModal from "./QuoteModal";
 import { ProductImage } from "@/lib/firebaseService";
@@ -20,7 +20,7 @@ interface ProductDetailsModalProps {
   productMedia: ProductImage[];
 }
 
-const ProductDetailsModal = ({
+const ProductDetailsModal = memo(({
   isOpen,
   onClose,
   productName,
@@ -224,6 +224,6 @@ const ProductDetailsModal = ({
       />
     </>
   );
-};
+});
 
 export default ProductDetailsModal;

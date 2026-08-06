@@ -1,6 +1,7 @@
+import { memo } from "react";
 import { MessageCircle } from "lucide-react";
 
-const WhatsAppButton = () => {
+const WhatsAppButton = memo(() => {
   const whatsappNumber = "918595555488";
   const message = "Hi! I'm interested in your hospitality products.";
 
@@ -19,6 +20,6 @@ const WhatsAppButton = () => {
       <span className="text-sm font-semibold uppercase tracking-wide">Chat on WhatsApp</span>
     </button>
   );
-};
+});
 
 export default WhatsAppButton;
