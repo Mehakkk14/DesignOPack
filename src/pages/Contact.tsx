@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { MapPin, Phone, Mail, Clock } from "lucide-react";
+import { FaInstagram, FaFacebookF, FaWhatsapp } from "@/components/SocialIcons";
 import handshakeBanner from "@/assets/handshake-banner.jpg";
 
 interface ContactFormData {
@@ -459,6 +460,77 @@ From: DesignOPack Website Contact Form
               referrerPolicy="no-referrer-when-downgrade"
               title="DesignOPack Office Location"
             ></iframe>
+          </div>
+        </div>
+      </section>
+
+      {/* Immediate Assistance & Social Section */}
+      <section className="py-16 px-4 border-t border-border bg-background">
+        <div className="container mx-auto max-w-4xl text-center">
+          {/* Primary WhatsApp CTA Card */}
+          <div className="mb-10">
+            <h2 className="text-3xl md:text-4xl font-heading font-bold text-foreground mb-3">
+              Need Immediate Assistance?
+            </h2>
+            <p className="text-muted-foreground font-body text-base md:text-lg mb-8 max-w-2xl mx-auto leading-relaxed">
+              Our team is just one message away. Connect instantly or explore our latest work on social media.
+            </p>
+            <a
+              href="https://wa.me/918595555488?text=Hi!%20I'm%20interested%20in%20your%20hospitality%20products."
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Chat with DesignOPack on WhatsApp"
+              title="Chat with DesignOPack on WhatsApp"
+              className="inline-flex items-center justify-center gap-3 px-8 py-4 rounded-lg bg-[#25D366] hover:bg-[#20BA5A] text-white font-medium text-base md:text-lg shadow-md hover:shadow-xl transition-all duration-300 hover-lift"
+            >
+              <FaWhatsapp className="text-2xl flex-shrink-0" />
+              <span>Chat on WhatsApp</span>
+            </a>
+          </div>
+
+          {/* Subtle Divider */}
+          <div className="flex items-center justify-center my-10 max-w-xs sm:max-w-md mx-auto">
+            <div className="flex-grow border-t border-border"></div>
+            <span className="px-4 text-xs font-body font-medium uppercase tracking-widest text-muted-foreground">
+              OR
+            </span>
+            <div className="flex-grow border-t border-border"></div>
+          </div>
+
+          {/* Follow Our Journey */}
+          <div>
+            <h3 className="text-2xl md:text-3xl font-heading font-bold text-foreground mb-3">
+              Follow Our Journey
+            </h3>
+            <p className="text-muted-foreground font-body text-sm md:text-base mb-8 max-w-2xl mx-auto leading-relaxed">
+              Follow our latest hospitality packaging projects, premium product launches and behind-the-scenes updates.
+            </p>
+
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+              <a
+                href="https://www.instagram.com/designopack.india?igsh=MWNscXhiMndvYnQ2cQ%3D%3D&utm_source=qr"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Follow DesignOPack on Instagram"
+                title="Follow DesignOPack on Instagram"
+                className="w-full sm:w-auto min-w-[200px] inline-flex items-center justify-center gap-3 px-6 py-3.5 rounded-lg bg-card hover:bg-muted border border-border text-foreground font-medium text-sm transition-all duration-300 hover-lift shadow-sm hover:shadow-md"
+              >
+                <FaInstagram className="text-[#E4405F] text-xl flex-shrink-0" />
+                <span>Instagram</span>
+              </a>
+
+              <a
+                href="https://www.facebook.com/Designopackindia/?rdid=wgD0jKXtlQhboEJG"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Follow DesignOPack on Facebook"
+                title="Follow DesignOPack on Facebook"
+                className="w-full sm:w-auto min-w-[200px] inline-flex items-center justify-center gap-3 px-6 py-3.5 rounded-lg bg-card hover:bg-muted border border-border text-foreground font-medium text-sm transition-all duration-300 hover-lift shadow-sm hover:shadow-md"
+              >
+                <FaFacebookF className="text-[#1877F2] text-xl flex-shrink-0" />
+                <span>Facebook</span>
+              </a>
+            </div>
           </div>
         </div>
       </section>

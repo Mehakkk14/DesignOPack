@@ -93,7 +93,7 @@ const Footer = memo(() => {
           </p>
           <div className="flex gap-4">
             <a
-              href="https://www.facebook.com/share/16PFsxmaPH/"
+              href="https://www.facebook.com/Designopackindia/?rdid=wgD0jKXtlQhboEJG"
               target="_blank"
               rel="noopener noreferrer"
               className="text-footer-text hover:text-maroon transition-colors"

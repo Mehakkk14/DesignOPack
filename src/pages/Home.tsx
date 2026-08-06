@@ -19,6 +19,7 @@ import ctaBackground from "@/assets/cta-background.png";
 import { getActiveBanners, Banner } from "@/lib/firebaseService";
 import { logger } from "@/lib/logger";
 import { LazySection } from "@/components/LazySection";
+import { FaInstagram, FaFacebookF } from "@/components/SocialIcons";
 
 import {
   Carousel,
@@ -416,6 +417,52 @@ const Home = () => {
             >
               <Link to="/contact">Get in Touch</Link>
             </Button>
+
+            {/* Subtle Divider */}
+            <div className="flex items-center justify-center my-8 max-w-xs sm:max-w-md mx-auto">
+              <div className="flex-grow border-t border-white/20"></div>
+              <span className="px-4 text-xs font-body font-medium uppercase tracking-widest text-gray-300">
+                OR
+              </span>
+              <div className="flex-grow border-t border-white/20"></div>
+            </div>
+
+            {/* Follow Our Work Section */}
+            <div className="text-center max-w-xl mx-auto">
+              <h3 className="text-xl md:text-2xl font-heading font-bold text-white mb-2">
+                Follow Our Work
+              </h3>
+              <p className="text-sm md:text-base text-gray-200 font-body mb-6 leading-relaxed">
+                Discover our latest hospitality packaging projects, premium product collections and company updates.
+              </p>
+
+              {/* Social Buttons */}
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                <a
+                  href="https://www.instagram.com/designopack.india?igsh=MWNscXhiMndvYnQ2cQ%3D%3D&utm_source=qr"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Follow DesignOPack on Instagram"
+                  title="Follow DesignOPack on Instagram"
+                  className="w-full sm:w-auto min-w-[180px] inline-flex items-center justify-center gap-2.5 px-6 py-3 rounded-lg bg-white/10 hover:bg-white/20 border border-white/25 text-white font-medium text-sm transition-all duration-300 hover-lift shadow-md hover:shadow-lg backdrop-blur-sm"
+                >
+                  <FaInstagram className="text-[#E4405F] text-xl flex-shrink-0" />
+                  <span>Instagram</span>
+                </a>
+
+                <a
+                  href="https://www.facebook.com/Designopackindia/?rdid=wgD0jKXtlQhboEJG"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Follow DesignOPack on Facebook"
+                  title="Follow DesignOPack on Facebook"
+                  className="w-full sm:w-auto min-w-[180px] inline-flex items-center justify-center gap-2.5 px-6 py-3 rounded-lg bg-white/10 hover:bg-white/20 border border-white/25 text-white font-medium text-sm transition-all duration-300 hover-lift shadow-md hover:shadow-lg backdrop-blur-sm"
+                >
+                  <FaFacebookF className="text-[#1877F2] text-xl flex-shrink-0" />
+                  <span>Facebook</span>
+                </a>
+              </div>
+            </div>
           </div>
         </section>
       </LazySection>
