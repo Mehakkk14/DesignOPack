@@ -1,6 +1,8 @@
-# Designopack Luxury Showcase
+# DesignOPack 
 
-Designopack is a premium luxury packaging showcase platform that displays high-end packaging products with an elegant, interactive experience for customers to explore packaging solutions.
+A complete business website for a 15-year-old luxury
+packaging brand DesignOPack, incorporating an admin panel, SEO optimization, and end-to-end website
+functionality to support real-world business operations.
 
 ## Features
 
