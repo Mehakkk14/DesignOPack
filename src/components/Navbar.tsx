@@ -1,15 +1,12 @@
 import { useState, useEffect, memo } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X, Shield } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { auth } from "@/lib/firebase";
-import { onAuthStateChanged } from "firebase/auth";
 import logo from "@/assets/designopack-logo-transparent.png";
 
 const Navbar = memo(() => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
   const location = useLocation();
 
   useEffect(() => {
@@ -18,13 +15,6 @@ const Navbar = memo(() => {
     };
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setIsAdmin(!!user);
-    });
-    return () => unsubscribe();
   }, []);
 
   const navLinks = [
@@ -82,11 +72,6 @@ const Navbar = memo(() => {
             <Button variant="default" size="sm" asChild>
               <Link to="/contact">Request Quote</Link>
             </Button>
-            <Button variant="outline" size="sm" asChild className="border-primary text-primary hover:bg-primary hover:text-white w-10 h-10 p-0">
-              <Link to={isAdmin ? "/admin" : "/admin/login"} className="flex items-center justify-center" title="Admin">
-                <Shield size={16} />
-              </Link>
-            </Button>
           </div>
 
           {/* Mobile Menu Button */}
@@ -118,11 +103,6 @@ const Navbar = memo(() => {
             <Button variant="default" size="sm" className="w-full mt-4" asChild>
               <Link to="/contact" onClick={() => setIsMobileMenuOpen(false)}>
                 Request Quote
-              </Link>
-            </Button>
-            <Button variant="outline" size="sm" className="w-full mt-2 border-primary text-primary" asChild>
-              <Link to={isAdmin ? "/admin" : "/admin/login"} onClick={() => setIsMobileMenuOpen(false)} className="flex items-center justify-center" aria-label="Admin panel">
-                <Shield size={16} />
               </Link>
             </Button>
           </div>
